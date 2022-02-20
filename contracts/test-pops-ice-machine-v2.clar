@@ -6,6 +6,7 @@
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MIN-FREEZING-BLOCKS u10)
 (define-constant ICE-PER-POP-PER-BLOCK u10)
+
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-NOT-FOUND (err u404))

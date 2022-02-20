@@ -9,6 +9,7 @@
 (define-constant MELT-TIME u30)
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
+(define-constant MIN-BALANCE u30)
 
 ;; get the token balance of owner
 (define-read-only (get-balance (owner principal))
@@ -63,7 +64,7 @@
     )
     (asserts! (> block-height (+ (get freeze user-actions) MELT-TIME)) ERR-TOO-COLD)
     (asserts! (> block-height (+ (get melt user-actions) MELT-TIME)) ERR-TOO-HOT)
-    (asserts! (>= user-balance u30) ERR-TOO-LOW)
+    (asserts! (>= user-balance MIN-BALANCE) ERR-TOO-LOW)
     (map-set last-actions user (merge user-actions {melt: block-height}))
     (try! (ft-transfer? ice  melt-amount user (var-get ice-machine)))
     (try! (ft-transfer? ice  reward-amount user tx-sender))
