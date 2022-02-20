@@ -268,17 +268,45 @@ Clarinet.test({
     // We mine empty blocks 
     chain.mineEmptyBlock(MELT_TIME);
 
-    const heatWaveBlock = chain.mineBlock([
+    let heatWaveBlock = chain.mineBlock([
       Tx.contractCall('test-pops-ice-v2', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
     ]);
     assertEquals(heatWaveBlock.receipts[0].result, '(ok true)', 'Should be able to send a heat wave');
 
+    // we try to resend, should be too hot
+    heatWaveBlock = chain.mineBlock([
+      Tx.contractCall('test-pops-ice-v2', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
+    ]);
+    assertEquals(heatWaveBlock.receipts[0].result, '(err u502)', 'Shouldnt be able to send a heat wave');
+
+    // we check balances
     const newIceBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculNewBalance = Math.round(calculBalance - ((calculBalance * (MELT_RATE+REWARD_RATE))/100));
     assertEquals(newIceBalance.result, `(ok u${calculNewBalance})`,  `Balance should be ${calculNewBalance} but is ${newIceBalance.result}`);
 
-    const attackerBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(attacker.address)], deployer.address);
-    const calculAttackerBalance = Math.round((calculBalance * REWARD_RATE)/100);
+    let attackerBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(attacker.address)], deployer.address);
+    let calculAttackerBalance = Math.round((calculBalance * REWARD_RATE)/100);
     assertEquals(attackerBalance.result, `(ok u${calculAttackerBalance})`,  `Balance should be ${calculAttackerBalance} but is ${attackerBalance.result}`);
+
+    // we transfer
+    const tranferBlock = chain.mineBlock([
+      Tx.contractCall('test-pops-ice-v2', 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+    ]);
+    assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
+
+
+    attackerBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(attacker.address)], deployer.address);
+    calculAttackerBalance = calculAttackerBalance + (calculNewBalance-4);
+    assertEquals(attackerBalance.result, `(ok u${calculAttackerBalance})`,  `Balance should be ${calculAttackerBalance} but is ${attackerBalance.result}`);
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MELT_TIME);
+
+    // We try to resend heat wave with low balance
+    heatWaveBlock = chain.mineBlock([
+      Tx.contractCall('test-pops-ice-v2', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
+    ]);
+    assertEquals(heatWaveBlock.receipts[0].result, '(err u503)', 'Shouldnt be able to send a heat wave');
+
   },
 });
