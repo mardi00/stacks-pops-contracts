@@ -52,14 +52,9 @@
 ;; Mint new NFT
 ;; can only be called from the Mint
 (define-public (mint (new-owner principal) (id uint))
-  (let (
-    (counter (unwrap! (map-get? token-count new-owner) ERR-NOT-FOUND))
-  )
-    (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-    (unwrap! (map-set token-count new-owner (+ counter u1)) ERR-NOT-FOUND)
-    (try! (nft-mint? FrozenPop id new-owner) ERR-NOT-FOUND)
-  )
-)
+(begin
+  (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
+  (nft-mint? FrozenPop id new-owner)))
 
 (define-public (burn (id uint) (owner principal))
   (begin
