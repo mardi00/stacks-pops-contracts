@@ -1,0 +1,19 @@
+[project]
+name = "machine"
+requirements = []
+
+[contracts.test-frozen-pops-v2]
+path = "contracts/test-frozen-pops-v2.clar"
+depends_on = []
+
+[contracts.test-pops-v2]
+path = "contracts/test-pops-v2.clar"
+depends_on = []
+
+[contracts.test-pops-ice-v2]
+path = "contracts/test-pops-ice-v2.clar"
+depends_on = []
+
+[contracts.test-pops-ice-machine-v2]
+path = "contracts/test-pops-ice-machine-v2.clar"
+depends_on = ["test-pops-v2", "test-pops-ice-v2"]
