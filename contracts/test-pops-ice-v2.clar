@@ -63,7 +63,7 @@
     )
     (asserts! (> block-height (+ (get freeze user-actions) MELT-TIME)) ERR-TOO-COLD)
     (asserts! (> block-height (+ (get melt user-actions) MELT-TIME)) ERR-TOO-HOT)
-    (asserts! (or (is-eq melt-amount u0) (is-eq reward-amount u0)) (ok true))
+    (asserts! (or (>= melt-amount u0) (>= reward-amount u0)) ERR-TOO-LOW)
     (map-set last-actions user (merge user-actions {melt: block-height}))
     (try! (ft-transfer? ice  melt-amount user (var-get ice-machine)))
     (try! (ft-transfer? ice  reward-amount user tx-sender))
