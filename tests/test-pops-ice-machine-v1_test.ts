@@ -61,7 +61,7 @@ Clarinet.test({
     assertEquals(balance.result, '(ok [])', 'Should have 0 pops');
 
     const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    // assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
+    assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
   },
 });
 
@@ -96,7 +96,7 @@ Clarinet.test({
     assertEquals(balance.result, '(ok [])', 'Should have 0 pops');
 
     const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    // assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
+    assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
 
     // TOO EARLY
     const defrostBlockFail = chain.mineBlock([
@@ -136,8 +136,8 @@ Clarinet.test({
     balance = chain.callReadOnlyFn('test-pops-v2', 'get-pops-by-owner', [types.principal(deployer.address)], deployer.address);
     assertEquals(balance.result, '(ok [])', 'Should have 0 pops');
 
-    const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    // assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
+    let frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
@@ -147,6 +147,9 @@ Clarinet.test({
       Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
     ]);
     assertEquals(defrostBlock.receipts[0].result, '(ok true)',  'Should be able to defrost');
+
+    frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u0', 'Should have 0 frozen pops');
 
     const iceBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
@@ -185,8 +188,8 @@ Clarinet.test({
     balance = chain.callReadOnlyFn('test-pops-v2', 'get-pops-by-owner', [types.principal(deployer.address)], deployer.address);
     assertEquals(balance.result, '(ok [])', 'Should have 0 pops');
 
-    const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    // assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
+    let frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
 
     // We mine empty blocks
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
@@ -196,6 +199,9 @@ Clarinet.test({
       Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
     ]);
     assertEquals(defrostBlock.receipts[0].result, '(ok true)',  'Should be able to defrost');
+
+    frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u0', 'Should have 0 frozen pops');
 
     const iceBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
@@ -240,8 +246,8 @@ Clarinet.test({
     balance = chain.callReadOnlyFn('test-pops-v2', 'get-pops-by-owner', [types.principal(deployer.address)], deployer.address);
     assertEquals(balance.result, '(ok [])', 'Should have 0 pops');
 
-    const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    // assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
+    let frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u3', 'Should have 3 frozen pops');
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
@@ -251,6 +257,9 @@ Clarinet.test({
       Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
     ]);
     assertEquals(defrostBlock.receipts[0].result, '(ok true)',  'Should be able to defrost');
+
+    frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    assertEquals(frozenBalance.result, 'u0', 'Should have 0 frozen pops');
 
     const iceBalance = chain.callReadOnlyFn('test-pops-ice-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
