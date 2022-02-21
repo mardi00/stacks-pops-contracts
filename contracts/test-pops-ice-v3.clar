@@ -1,5 +1,4 @@
-;;(define-constant TOTAL-SUPPLY u1380000000)
-(define-constant TOTAL-SUPPLY u13)
+(define-constant TOTAL-SUPPLY u1380000000)
 (define-fungible-token ice TOTAL-SUPPLY)
 
 (define-data-var ice-machine principal tx-sender)
