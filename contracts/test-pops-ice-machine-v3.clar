@@ -45,7 +45,7 @@
 
 (define-private (defrost (id uint))
     (let ((freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
-      (ice-cubes (* u10 (- block-height freeze-bh)))
+      (ice-cubes (* ICE-PER-POP-PER-BLOCK (- block-height freeze-bh)))
       (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
       (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
       (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
