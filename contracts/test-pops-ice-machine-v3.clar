@@ -6,7 +6,6 @@
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MIN-FREEZING-BLOCKS u10)
 (define-constant ICE-PER-POP-PER-BLOCK u10)
-
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-NOT-FOUND (err u404))
@@ -20,12 +19,12 @@
 
 ;; Freeze a Pop
 (define-private (freeze (id uint))
-  (let ((owner (unwrap! (unwrap! (contract-call? .test-pops-v2 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+  (let ((owner (unwrap! (unwrap! (contract-call? .test-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
-    (try! (contract-call? .test-pops-v2 transfer id tx-sender (as-contract tx-sender)))
-    (contract-call? .test-frozen-pops-v2 mint tx-sender id)))
+    (try! (contract-call? .test-pops-v3 transfer id tx-sender (as-contract tx-sender)))
+    (contract-call? .test-frozen-pops-v3 mint tx-sender id)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
   (begin
@@ -39,7 +38,7 @@
     item
     result))
 
-(define-public (freeze-many (ids (list 50 uint)))
+(define-public (freeze-many (ids (list 100 uint)))
   (begin
     (asserts! (>= (len ids) u3) ERR-FATAL)
     (fold check-err (map freeze ids) (ok true))))
@@ -47,13 +46,13 @@
 (define-private (defrost (id uint))
     (let ((freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
       (ice-cubes (* u10 (- block-height freeze-bh)))
-      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v2 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
       (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
       (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
       (map-delete frozen-pops id)
-      (try! (contract-call? .test-frozen-pops-v2 burn id tx-sender))
-      (try! (as-contract (contract-call? .test-pops-ice-v2 transfer ice-cubes tx-sender owner)))
-      (try! (as-contract (contract-call? .test-pops-v2 transfer id tx-sender owner)))
+      (try! (contract-call? .test-frozen-pops-v3 burn id tx-sender))
+      (try! (as-contract (contract-call? .test-pops-ice-v3 transfer ice-cubes tx-sender owner)))
+      (try! (as-contract (contract-call? .test-pops-v3 transfer id tx-sender owner)))
       (ok true)))
 
 (define-public (defrost-three (id1 uint) (id2 uint) (id3 uint))
@@ -63,7 +62,7 @@
     (try! (defrost id3))
     (ok true)))
 
-(define-public (defrost-many (ids (list 50 uint)))
+(define-public (defrost-many (ids (list 100 uint)))
   (fold check-err (map defrost ids) (ok true)))
 
 ;; Switch power on or off
@@ -79,5 +78,5 @@
 )
 
 ;; set mint address for frozen-pops
-(as-contract (contract-call? .test-frozen-pops-v2 set-mint-address))
-(as-contract (contract-call? .test-pops-ice-v2 set-ice-machine tx-sender))
+(as-contract (contract-call? .test-frozen-pops-v3 set-mint-address))
+(as-contract (contract-call? .test-pops-ice-v3 set-ice-machine tx-sender))
