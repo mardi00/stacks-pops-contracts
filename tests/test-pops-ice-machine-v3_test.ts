@@ -44,6 +44,12 @@ const checkFrozenBalanceByOwner = (owner: string, chain: Chain, expected: string
   return frozenBalance;
 };
 
+const checkIceBalance = (owner: string, chain: Chain, expected: string) => {
+  const iceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(owner)], owner);
+  assertEquals(iceBalance.result, expected,  `Balance should be ${expected} but got ${iceBalance.result}`);
+  return iceBalance;
+};
+
 const freezePopsAndTest = (caller: string, chain: Chain, expected: string) => {
   const freezeBlock = chain.mineBlock([
     Tx.contractCall('test-pops-ice-machine-v3', 'freeze-many', [STACKSPOPS], caller),
@@ -59,6 +65,14 @@ const defrostPopsAndTest = (caller: string, chain: Chain, expected: string) => {
   assertEquals(defrostBlock.receipts[0].result, expected,  `Should be ${expected} but got ${defrostBlock.receipts[0].result}`);
   return defrostBlock;
 };
+
+const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain, expected: string) => {
+  const heatWaveBlock = chain.mineBlock([
+    Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(target)], caller),
+  ]);
+  assertEquals(heatWaveBlock.receipts[0].result, expected, `Should ${expected} got ${heatWaveBlock.receipts[0].result}`);
+};
+
 
 
 Clarinet.test({
@@ -103,16 +117,15 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
-    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
     freezePopsAndTest(deployer.address, chain, '(ok true)');
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
-
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
-
 
     defrostPopsAndTest(deployer.address, chain, '(err u501)');
   },
@@ -125,28 +138,25 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
-    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
     const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)');
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
-
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
     defrostPopsAndTest(deployer.address, chain, '(ok true)');
-
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
-
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
-    const iceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
-    assertEquals(iceBalance.result, `(ok u${calculBalance})`,  `Balance should be ${calculBalance} and got ${iceBalance.result}`);
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
   },
 });
 
@@ -178,9 +188,8 @@ Clarinet.test({
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
-    const iceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
-    assertEquals(iceBalance.result, `(ok u${calculBalance})`,  `Balance should be ${calculBalance} and got ${iceBalance.result}`);
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
   },
 });
 
@@ -210,9 +219,8 @@ Clarinet.test({
 
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const iceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
-    assertEquals(iceBalance.result, `(ok u${calculBalance})`,  `Balance should be ${calculBalance}`);
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
 
     const heatWaveBlock = chain.mineBlock([
       Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
@@ -237,7 +245,6 @@ Clarinet.test({
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
-
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
 
     // We mine empty blocks 
@@ -245,35 +252,29 @@ Clarinet.test({
 
 
     defrostPopsAndTest(deployer.address, chain, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
-   checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const iceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
-    assertEquals(iceBalance.result, `(ok u${calculBalance})`,  `Balance should be ${calculBalance}`);
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MELT_TIME);
 
-    let heatWaveBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
-    ]);
-    assertEquals(heatWaveBlock.receipts[0].result, '(ok true)', 'Should be able to send a heat wave');
+
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(ok true)') 
 
     // we try to resend, should be too hot
-    heatWaveBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
-    ]);
-    assertEquals(heatWaveBlock.receipts[0].result, '(err u502)', 'Shouldnt be able to send a heat wave');
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(err u502)') 
 
     // we check balances
-    const newIceBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(deployer.address)], deployer.address);
     const calculNewBalance = Math.round(calculBalance - ((calculBalance * (MELT_RATE+REWARD_RATE))/100));
-    assertEquals(newIceBalance.result, `(ok u${calculNewBalance})`,  `Balance should be ${calculNewBalance} but is ${newIceBalance.result}`);
+    checkIceBalance(deployer.address, chain, `(ok u${calculNewBalance})`);
 
-    let attackerBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(attacker.address)], deployer.address);
     let calculAttackerBalance = Math.round((calculBalance * REWARD_RATE)/100);
-    assertEquals(attackerBalance.result, `(ok u${calculAttackerBalance})`,  `Balance should be ${calculAttackerBalance} but is ${attackerBalance.result}`);
+    const attackerBalance = checkIceBalance(attacker.address, chain, `(ok u${calculAttackerBalance})`);
 
     // we transfer
     const tranferBlock = chain.mineBlock([
@@ -282,18 +283,15 @@ Clarinet.test({
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
 
-    attackerBalance = chain.callReadOnlyFn('test-pops-ice-v3', 'get-balance', [types.principal(attacker.address)], deployer.address);
+  
     calculAttackerBalance = calculAttackerBalance + (calculNewBalance-4);
-    assertEquals(attackerBalance.result, `(ok u${calculAttackerBalance})`,  `Balance should be ${calculAttackerBalance} but is ${attackerBalance.result}`);
+    checkIceBalance(attacker.address, chain, `(ok u${calculAttackerBalance})`);
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MELT_TIME);
 
     // We try to resend heat wave with low balance
-    heatWaveBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
-    ]);
-    assertEquals(heatWaveBlock.receipts[0].result, '(err u503)', 'Shouldnt be able to send a heat wave');
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(err u503)') 
 
   },
 });
