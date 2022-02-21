@@ -52,30 +52,27 @@
 ;; Mint new NFT
 ;; can only be called from the Mint
 (define-public (mint (new-owner principal) (id uint))
- (match (nft-mint? FrozenPop id new-owner)
-    success
-    (let 
-      ((owner-balance (get-balance new-owner)))
-      (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-      (map-set token-count
-        new-owner
-        (+ owner-balance u1))
-    (ok success))
-  error (err error))
+  (let 
+    ((owner-balance (get-balance new-owner)))
+    (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
+    (try! (nft-mint? FrozenPop id new-owner))
+    (map-set token-count
+      new-owner
+      (+ owner-balance u1))
+    (ok true)
+  )
 )
 
-
 (define-public (burn (id uint) (owner principal))
- (match (nft-burn? FrozenPop id owner)
-    success
-    (let 
-      ((owner-balance (get-balance owner)))
-      (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-      (map-set token-count
-        owner
-        (- owner-balance u1))
-    (ok success))
-  error (err error))
+  (let 
+    ((owner-balance (get-balance owner)))
+    (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
+    (try! (nft-burn? FrozenPop id owner))
+    (map-set token-count
+      owner
+      (- owner-balance u1))
+    (ok true)
+  )
 )
 
 ;; Set base uri
