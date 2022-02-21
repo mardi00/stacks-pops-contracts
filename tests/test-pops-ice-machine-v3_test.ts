@@ -51,6 +51,13 @@ const checkIceBalance = (owner: string, chain: Chain, expected: string) => {
   return iceBalance;
 };
 
+
+const checkIceBalanceMachine = (owner: string, chain: Chain, expected: string) => {
+  const iceMachineBalance = chain.callReadOnlyFn('test-pops-ice-machine-v3', 'get-machine-ice-balance', [], owner);
+  assertEquals(iceMachineBalance.result, expected,  `Balance should be ${expected} but got ${iceMachineBalance.result}`);
+  return iceMachineBalance;
+};
+
 const freezePopsAndTest = (caller: string, chain: Chain, expected: string, pops: any) => {
   const freezeBlock = chain.mineBlock([
     Tx.contractCall('test-pops-ice-machine-v3', 'freeze-many', [pops], caller),
@@ -75,13 +82,13 @@ const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain, expec
 };
 
 
-
 Clarinet.test({
   name: "Ensure that pops can't be frozen if the machine is off",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -100,6 +107,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -119,6 +127,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -134,6 +143,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -150,6 +160,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -171,6 +182,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -190,6 +202,7 @@ Clarinet.test({
 
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
     checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
   },
 });
 
@@ -201,6 +214,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -225,6 +239,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -250,6 +265,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
@@ -274,6 +290,7 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
@@ -301,13 +318,16 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name:  `Ensure that we can't send a heat wave too early`,
+  name:  `Ensure that we can't resend a heat wave too early`,
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
     let attacker = accounts.get('wallet_1')!;
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
 
@@ -328,6 +348,7 @@ Clarinet.test({
 
     const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
     checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
 
     const heatWaveBlock = chain.mineBlock([
       Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
@@ -345,8 +366,10 @@ Clarinet.test({
 
     flipPowerSwitchAndTest(deployer.address, chain);
     mintPopsAndTest(deployer.address, chain);
-    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
     const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
@@ -364,8 +387,10 @@ Clarinet.test({
 
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
+    const calculBalance = Math.round((chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3);
+    const calculMachineBalance = INITIAL_ICE - calculBalance;
     checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${calculMachineBalance}`);
 
     // We mine empty blocks 
     chain.mineEmptyBlock(MELT_TIME);
@@ -382,6 +407,8 @@ Clarinet.test({
 
     let calculAttackerBalance = Math.round((calculBalance * REWARD_RATE)/100);
     const attackerBalance = checkIceBalance(attacker.address, chain, `(ok u${calculAttackerBalance})`);
+
+    checkIceBalanceMachine(deployer.address, chain, `u${Math.round(calculMachineBalance + (calculBalance * MELT_RATE)/100)}`);
 
     // we transfer
     const tranferBlock = chain.mineBlock([
