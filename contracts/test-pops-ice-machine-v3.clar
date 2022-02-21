@@ -4,8 +4,8 @@
 
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
-(define-constant MIN-FREEZING-BLOCKS u10)
-(define-constant ICE-PER-POP-PER-BLOCK u10)
+(define-constant MIN-FREEZING-BLOCKS u2000)
+(define-constant ICE-PER-POP-PER-BLOCK u1)
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-NOT-FOUND (err u404))
@@ -44,16 +44,22 @@
     (fold check-err (map freeze ids) (ok true))))
 
 (define-private (defrost (id uint))
-    (let ((freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
+  (let 
+    (
+      (freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
       (ice-cubes (* ICE-PER-POP-PER-BLOCK (- block-height freeze-bh)))
-      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
-      (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
-      (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
-      (map-delete frozen-pops id)
-      (try! (contract-call? .test-frozen-pops-v3 burn id tx-sender))
-      (try! (as-contract (contract-call? .test-pops-ice-v3 transfer ice-cubes tx-sender owner)))
-      (try! (as-contract (contract-call? .test-pops-v3 transfer id tx-sender owner)))
-      (ok true)))
+      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
+      (ice-machine-balance (unwrap! (as-contract (contract-call? .test-pops-ice-v3 get-caller-balance)) ERR-FATAL))
+    )
+    (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
+    (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
+    (map-delete frozen-pops id)
+    (try! (contract-call? .test-frozen-pops-v3 burn id tx-sender))
+    (try! (as-contract (contract-call? .test-pops-v3 transfer id tx-sender owner)))
+    (unwrap! (as-contract (contract-call? .test-pops-ice-v3 transfer ice-cubes tx-sender owner)) (ok true))
+    (ok true)
+  )
+)
 
 (define-public (defrost-three (id1 uint) (id2 uint) (id3 uint))
   (begin
@@ -76,6 +82,12 @@
 (define-read-only (get-freeze-block-height (id uint))
   (unwrap! (map-get? frozen-pops id) u0)
 )
+
+;; Get the machine ice balance
+(define-read-only (get-machine-ice-balance)
+  (unwrap! (as-contract (contract-call? .test-pops-ice-v3 get-caller-balance)) u0)
+)
+
 
 ;; set mint address for frozen-pops
 (as-contract (contract-call? .test-frozen-pops-v3 set-mint-address))

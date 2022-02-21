@@ -1,4 +1,5 @@
-(define-constant TOTAL-SUPPLY u1380000000)
+;;(define-constant TOTAL-SUPPLY u1380000000)
+(define-constant TOTAL-SUPPLY u13)
 (define-fungible-token ice TOTAL-SUPPLY)
 
 (define-data-var ice-machine principal tx-sender)
@@ -6,15 +7,20 @@
 (define-constant ACTIONS-AT-DEPLOY {freeze: block-height, melt: block-height})
 
 ;; 5% of ice can melt within a year if not used
-(define-constant MELT-TIME u30)
+(define-constant MELT-TIME u48000)
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
-(define-constant MIN-BALANCE u30)
+(define-constant MIN-BALANCE u1618)
 
 ;; get the token balance of owner
 (define-read-only (get-balance (owner principal))
   (begin
     (ok (ft-get-balance ice owner))))
+
+;; get the token balance of the caller
+(define-read-only (get-caller-balance)
+  (begin
+    (ok (ft-get-balance ice tx-sender))))
 
 ;; returns the total number of tokens
 (define-read-only (get-total-supply)
