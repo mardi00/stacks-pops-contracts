@@ -4,8 +4,11 @@
 
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
+
+;; 2 weeks min
 (define-constant MIN-FREEZING-BLOCKS u2000)
 (define-constant ICE-PER-POP-PER-BLOCK u1)
+
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-NOT-FOUND (err u404))
@@ -19,12 +22,12 @@
 
 ;; Freeze a Pop
 (define-private (freeze (id uint))
-  (let ((owner (unwrap! (unwrap! (contract-call? .test-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+  (let ((owner (unwrap! (unwrap! (contract-call? .test-pops-v5 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
-    (try! (contract-call? .test-pops-v3 transfer id tx-sender (as-contract tx-sender)))
-    (contract-call? .test-frozen-pops-v3 mint tx-sender id)))
+    (try! (contract-call? .test-pops-v5 transfer id tx-sender (as-contract tx-sender)))
+    (contract-call? .test-frozen-pops-v5 mint tx-sender id)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
   (begin
@@ -48,14 +51,14 @@
     (
       (freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
       (ice-cubes (* ICE-PER-POP-PER-BLOCK (- block-height freeze-bh)))
-      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v3 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
+      (owner (unwrap! (unwrap! (contract-call? .test-frozen-pops-v5 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
     )
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
     (map-delete frozen-pops id)
-    (try! (contract-call? .test-frozen-pops-v3 burn id tx-sender))
-    (try! (as-contract (contract-call? .test-pops-v3 transfer id tx-sender owner)))
-    (match (as-contract (contract-call? .test-pops-ice-v3 transfer ice-cubes tx-sender owner))
+    (try! (contract-call? .test-frozen-pops-v5 burn id tx-sender))
+    (try! (as-contract (contract-call? .test-pops-v5 transfer id tx-sender owner)))
+    (match (as-contract (contract-call? .test-pops-ice-v5 transfer ice-cubes tx-sender owner))
       okValue (ok okValue)
       errValue (ok true)
     )
@@ -86,10 +89,10 @@
 
 ;; Get the machine ice balance
 (define-read-only (get-machine-ice-balance)
-  (unwrap! (as-contract (contract-call? .test-pops-ice-v3 get-caller-balance)) u0)
+  (unwrap! (as-contract (contract-call? .test-pops-ice-v5 get-caller-balance)) u0)
 )
 
 
 ;; set mint address for frozen-pops
-(as-contract (contract-call? .test-frozen-pops-v3 set-mint-address))
-(as-contract (contract-call? .test-pops-ice-v3 set-ice-machine tx-sender))
+(as-contract (contract-call? .test-frozen-pops-v5 set-mint-address))
+(as-contract (contract-call? .test-pops-ice-v5 set-ice-machine tx-sender))

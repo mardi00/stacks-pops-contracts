@@ -1,4 +1,4 @@
-(define-non-fungible-token FrozenPop uint)
+(define-non-fungible-token frozen-stacks-pops uint)
 
 ;; Storage
 (define-map token-count principal uint)
@@ -28,8 +28,8 @@
 
 ;; SIP009: Get the owner of the specified token ID
 (define-read-only (get-owner (id uint))
-  ;; Make sure to replace FrozenPop
-  (ok (nft-get-owner? FrozenPop id)))
+  ;; Make sure to replace frozen-stacks-pops
+  (ok (nft-get-owner? frozen-stacks-pops id)))
 
 ;; SIP009: Get the last token ID
 (define-read-only (get-last-token-id)
@@ -48,7 +48,7 @@
   (let 
     ((owner-balance (get-balance new-owner)))
     (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-    (try! (nft-mint? FrozenPop id new-owner))
+    (try! (nft-mint? frozen-stacks-pops id new-owner))
     (map-set token-count
       new-owner
       (+ owner-balance u1))
@@ -60,7 +60,7 @@
   (let 
     ((owner-balance (get-balance owner)))
     (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-    (try! (nft-burn? FrozenPop id owner))
+    (try! (nft-burn? frozen-stacks-pops id owner))
     (map-set token-count
       owner
       (- owner-balance u1))

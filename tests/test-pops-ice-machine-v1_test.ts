@@ -294,7 +294,7 @@ Clarinet.test({
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
 
     const heatWaveBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
+      Tx.contractCall('test-pops-ice-v5', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
     ]);
     assertEquals(heatWaveBlock.receipts[0].result, '(err u501)', 'Shouldnt be able to send a heat wave');
   },
@@ -355,7 +355,7 @@ Clarinet.test({
 
     // we transfer
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall('test-pops-ice-v5', 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
@@ -414,7 +414,7 @@ Clarinet.test({
 
     // we transfer 1 $ICE
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v3', 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall('test-pops-ice-v5', 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
