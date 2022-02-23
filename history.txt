@@ -65,3 +65,10 @@ exit
 ::get_assets_maps 
 (contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
 ::get_assets_maps 
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+\n(contract-call? .test-pops-ice-machine-v3 flip-power-switch)
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::advance_chain_tip 2000
+::get_assets_maps \n
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
