@@ -3,10 +3,11 @@ import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 
-export const STACKS_POPS_CONTRACT_NAME = 'stacks-pops-v5';
-export const FROZEN_STACKS_POPS_CONTRACT_NAME = 'frozen-stacks-pops-v5';
-export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = 'stacks-pops-ice-machine-v5';
-export const STACKS_POPS_ICE_CONTRACT_NAME = 'stacks-pops-ice-v5';
+const version = 'v5';
+export const STACKS_POPS_CONTRACT_NAME = `stacks-pops-${version}`;
+export const FROZEN_STACKS_POPS_CONTRACT_NAME = `frozen-stacks-pops-${version}`;
+export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${version}`;
+export const STACKS_POPS_ICE_CONTRACT_NAME = `stacks-pops-ice-${version}`;
 
 export const INITIAL_ICE = 1380000000;
 export const MIN_FREEZING_BLOCKS = 2000;
