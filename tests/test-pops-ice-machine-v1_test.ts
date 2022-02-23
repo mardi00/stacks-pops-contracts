@@ -19,7 +19,11 @@ import {
   REWARD_RATE,
   MIN_BALANCE,
   STACKSPOPS,
-  STACKSPOPS_INVALID
+  STACKSPOPS_INVALID,
+  STACKS_POPS_CONTRACT_NAME,
+  FROZEN_STACKS_POPS_CONTRACT_NAME,
+  STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
+  STACKS_POPS_ICE_CONTRACT_NAME
 } from './test-helper.ts';
 
 Clarinet.test({
@@ -294,7 +298,7 @@ Clarinet.test({
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
 
     const heatWaveBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v5', 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
     ]);
     assertEquals(heatWaveBlock.receipts[0].result, '(err u501)', 'Shouldnt be able to send a heat wave');
   },
@@ -355,7 +359,7 @@ Clarinet.test({
 
     // we transfer
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v5', 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
@@ -414,7 +418,7 @@ Clarinet.test({
 
     // we transfer 1 $ICE
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-v5', 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 

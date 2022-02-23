@@ -19,7 +19,11 @@ import {
   REWARD_RATE,
   MIN_BALANCE,
   STACKSPOPS,
-  STACKSPOPS_INVALID
+  STACKSPOPS_INVALID,
+  STACKS_POPS_CONTRACT_NAME,
+  FROZEN_STACKS_POPS_CONTRACT_NAME,
+  STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
+  STACKS_POPS_ICE_CONTRACT_NAME
 } from './test-helper.ts';
 
 
@@ -29,7 +33,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let wallet1 = accounts.get('wallet_1')!;
     const mintAddressBlock = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'set-mint-address', [], wallet1.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'set-mint-address', [], wallet1.address),
     ]);
     const expected = `(err u506)`;
     assertEquals(mintAddressBlock.receipts[0].result, expected, `Should be ${expected} but got ${mintAddressBlock.receipts[0].result}`);
@@ -42,7 +46,7 @@ Clarinet.test({
       let deployer = accounts.get('deployer')!;
 
     const block = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'set-base-uri', [types.ascii('loool')], deployer.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'set-base-uri', [types.ascii('loool')], deployer.address),
     ]);
     const expected = `(ok true)`;
     assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
@@ -55,14 +59,14 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
 
     const freeze = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'freeze-metadata', [], deployer.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'freeze-metadata', [], deployer.address),
     ]);
     let expected = `(ok true)`;
     assertEquals(freeze.receipts[0].result, expected, `Should be ${expected} but got ${freeze.receipts[0].result}`);
 
 
     const block = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'set-base-uri', [types.ascii('loool')], deployer.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'set-base-uri', [types.ascii('loool')], deployer.address),
     ]);
     expected = `(err u505)`;
     assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
@@ -75,7 +79,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let wallet1 = accounts.get('wallet_1')!;
     const mintAddressBlock = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'mint', [types.principal(wallet1.address), types.uint(1)], wallet1.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'mint', [types.principal(wallet1.address), types.uint(1)], wallet1.address),
     ]);
     const expected = `(err u401)`;
     assertEquals(mintAddressBlock.receipts[0].result, expected, `Should be ${expected} but got ${mintAddressBlock.receipts[0].result}`);
@@ -92,7 +96,7 @@ Clarinet.test({
     freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
     const burnAddressBlock = chain.mineBlock([
-      Tx.contractCall('test-frozen-pops-v5', 'burn', [types.uint(1), types.principal(deployer.address)], deployer.address),
+      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'burn', [types.uint(1), types.principal(deployer.address)], deployer.address),
     ]);
     const expected = `(err u401)`;
     assertEquals(burnAddressBlock.receipts[0].result, expected, `Should be ${expected} but got ${burnAddressBlock.receipts[0].result}`);

@@ -2,18 +2,18 @@
 name = "machine"
 requirements = []
 
-[contracts.test-frozen-pops-v5]
-path = "contracts/test-frozen-pops-v1.clar"
+[contracts.frozen-stacks-pops-v5]
+path = "contracts/frozen-stacks-pops-v1.clar"
 depends_on = []
 
-[contracts.test-pops-v5]
-path = "contracts/test-pops-v1.clar"
+[contracts.stacks-pops-v5]
+path = "contracts/stacks-pops-v1.clar"
 depends_on = []
 
-[contracts.test-pops-ice-v5]
-path = "contracts/test-pops-ice-v1.clar"
+[contracts.stacks-pops-ice-v5]
+path = "contracts/stacks-pops-ice-v1.clar"
 depends_on = []
 
-[contracts.test-pops-ice-machine-v5]
-path = "contracts/test-pops-ice-machine-v1.clar"
-depends_on = ["test-pops-v5", "test-pops-ice-v5"]
+[contracts.stacks-pops-ice-machine-v5]
+path = "contracts/stacks-pops-ice-machine-v1.clar"
+depends_on = ["stacks-pops-v5", "stacks-pops-ice-v5"]
