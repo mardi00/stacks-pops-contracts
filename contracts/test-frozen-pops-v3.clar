@@ -2,19 +2,12 @@
 
 ;; Storage
 (define-map token-count principal uint)
-(define-map market uint {price: uint, commission: principal})
 
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
-(define-constant ERR-SOLD-OUT (err u300))
-(define-constant ERR-WRONG-COMMISSION (err u301))
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-METADATA-FROZEN (err u505))
 (define-constant ERR-MINT-ALREADY-SET (err u506))
-(define-constant ERR-LISTING (err u507))
-(define-constant ERR-NOT-FOUND u401)
-(define-constant FROZEN-POP-LIMIT u888)
-
 
 ;; Define Variables
 (define-data-var last-id uint u0)
