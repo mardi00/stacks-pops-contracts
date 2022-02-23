@@ -26,9 +26,9 @@ import {
 Clarinet.test({
   name: "Ensure that we can't change set-mint-address",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-      let deployer = accounts.get('deployer')!;
-      let wallet1 = accounts.get('wallet_1')!;
-      const mintAddressBlock = chain.mineBlock([
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
+    const mintAddressBlock = chain.mineBlock([
       Tx.contractCall('test-frozen-pops-v3', 'set-mint-address', [], wallet1.address),
     ]);
     const expected = `(err u506)`;
@@ -36,13 +36,45 @@ Clarinet.test({
   },
 });
 
+Clarinet.test({
+  name: "Ensure that we can set-base-uri",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+      let deployer = accounts.get('deployer')!;
+
+    const block = chain.mineBlock([
+      Tx.contractCall('test-frozen-pops-v3', 'set-base-uri', [types.ascii('loool')], deployer.address),
+    ]);
+    const expected = `(ok true)`;
+    assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
+  },
+});
+
+Clarinet.test({
+  name: "Ensure that we can't set-base-uri when metadata are frozen",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+
+    const freeze = chain.mineBlock([
+      Tx.contractCall('test-frozen-pops-v3', 'freeze-metadata', [], deployer.address),
+    ]);
+    let expected = `(ok true)`;
+    assertEquals(freeze.receipts[0].result, expected, `Should be ${expected} but got ${freeze.receipts[0].result}`);
+
+
+    const block = chain.mineBlock([
+      Tx.contractCall('test-frozen-pops-v3', 'set-base-uri', [types.ascii('loool')], deployer.address),
+    ]);
+    expected = `(err u505)`;
+    assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
+  },
+});
 
 Clarinet.test({
   name: "External can't mint pop",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-      let deployer = accounts.get('deployer')!;
-      let wallet1 = accounts.get('wallet_1')!;
-      const mintAddressBlock = chain.mineBlock([
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
+    const mintAddressBlock = chain.mineBlock([
       Tx.contractCall('test-frozen-pops-v3', 'mint', [types.principal(wallet1.address), types.uint(1)], wallet1.address),
     ]);
     const expected = `(err u401)`;
