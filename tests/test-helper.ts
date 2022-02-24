@@ -3,7 +3,7 @@ import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 
-const version = 'v8';
+const version = 'v1';
 export const STACKS_POPS_CONTRACT_NAME = `stacks-pops-${version}`;
 export const FROZEN_STACKS_POPS_CONTRACT_NAME = `frozen-stacks-pops-${version}`;
 export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${version}`;

@@ -22,12 +22,12 @@
 
 ;; Freeze a Pop
 (define-private (freeze (id uint))
-  (let ((owner (unwrap! (unwrap! (contract-call? .stacks-pops-v8 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+  (let ((owner (unwrap! (unwrap! (contract-call? .stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
-    (try! (contract-call? .stacks-pops-v8 transfer id tx-sender (as-contract tx-sender)))
-    (contract-call? .frozen-stacks-pops-v8 mint tx-sender id)))
+    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
+    (contract-call? .frozen-stacks-pops-v1 mint tx-sender id)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
   (begin
@@ -51,14 +51,14 @@
     (
       (freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
       (ice-cubes (* ICE-PER-POP-PER-BLOCK (- block-height freeze-bh)))
-      (owner (unwrap! (unwrap! (contract-call? .frozen-stacks-pops-v8 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
+      (owner (unwrap! (unwrap! (contract-call? .frozen-stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
     )
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
     (map-delete frozen-pops id)
-    (try! (contract-call? .frozen-stacks-pops-v8 burn id tx-sender))
-    (try! (as-contract (contract-call? .stacks-pops-v8 transfer id tx-sender owner)))
-    (match (as-contract (contract-call? .stacks-pops-ice-v8 transfer ice-cubes tx-sender owner))
+    (try! (contract-call? .frozen-stacks-pops-v1 burn id tx-sender))
+    (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
+    (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner))
       okValue (ok okValue)
       errValue (ok true)
     )
@@ -89,10 +89,10 @@
 
 ;; Get the machine ice balance
 (define-read-only (get-machine-ice-balance)
-  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v8 get-caller-balance)) u0)
+  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v1 get-caller-balance)) u0)
 )
 
 
 ;; set mint address for frozen-pops
-(as-contract (contract-call? .frozen-stacks-pops-v8 set-mint-address))
-(as-contract (contract-call? .stacks-pops-ice-v8 set-ice-machine tx-sender))
+(as-contract (contract-call? .frozen-stacks-pops-v1 set-mint-address))
+(as-contract (contract-call? .stacks-pops-ice-v1 set-ice-machine tx-sender))
