@@ -1,21 +1,46 @@
 
-import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v0.13.0/index.ts';
+import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land/x/clarinet@v0.13.0/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
+import {
+  mintPopsAndTest,
+  checkIceBalanceMachine,
+  checkFrozenBalanceByOwner,
+  checkPopsBalanceByOwner,
+  freezePopsAndTest,
+  flipPowerSwitchAndTest,
+  defrostPopsAndTest,
+  checkIceBalance,
+  sendHeatwaveAndTest,
+  INITIAL_ICE,
+  MIN_FREEZING_BLOCKS,
+  ICE_PER_POP_PER_BLOCK,
+  MELT_TIME,
+  MELT_RATE,
+  REWARD_RATE,
+  MIN_BALANCE,
+  STACKSPOPS,
+  STACKSPOPS_INVALID,
+  STACKS_POPS_CONTRACT_NAME,
+  FROZEN_STACKS_POPS_CONTRACT_NAME,
+  STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
+  STACKS_POPS_ICE_CONTRACT_NAME
+} from './test-helper.ts';
 
 Clarinet.test({
-  name: "Ensure that pops can't be frozen if the mahine is off",
+  name: "Ensure that pops can't be frozen if the machine is off",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
-    const mintBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
 
-    ]);
-    const freezeBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'freeze-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
-    assertEquals(freezeBlock.receipts[0].result, '(err u500)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    freezePopsAndTest(deployer.address, chain, '(err u500)', STACKSPOPS);
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
   },
 });
 
@@ -24,31 +49,60 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    const flipPowerSwitchBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'flip-power-switch', [], deployer.address),
-    ])
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
-    assertEquals(flipPowerSwitchBlock.receipts[0].result, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const mintBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
-    ]);
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+  },
+});
 
-    const balance = chain.callReadOnlyFn('test-pops-v2', 'get-pops-by-owner', [types.principal(deployer.address)], deployer.address);
+Clarinet.test({
+  name: "Ensure that the machine can be switched on by owner only",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
 
+    flipPowerSwitchAndTest(wallet1.address, chain, '(err u401)');
+  },
+});
 
-    const freezeBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'freeze-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
+Clarinet.test({
+  name: "Ensure that we can't freeze pops we don't own",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
 
-    const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    assertEquals(freezeBlock.receipts[0].result, '(ok true)');
-    assertEquals(frozenBalance.result, 'u3');
+    freezePopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+  },
+});
+
+Clarinet.test({
+  name: "Ensure that we can't freeze unknown id",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    freezePopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID);
   },
 });
 
@@ -58,121 +112,328 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    const flipPowerSwitchBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'flip-power-switch', [], deployer.address),
-    ])
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
-    assertEquals(flipPowerSwitchBlock.receipts[0].result, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const mintBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
-    ]);
-    const freezeBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'freeze-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
 
-    assertEquals(freezeBlock.receipts[0].result, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
 
-    // TOO EARLY
-    const defrostBlockFail = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
-
-    const frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-
-    assertEquals(defrostBlockFail.receipts[0].result, '(err u501)');
-    assertEquals(frozenBalance.result, 'u0');
+    defrostPopsAndTest(deployer.address, chain, '(err u501)', STACKSPOPS);
   },
 });
 
 Clarinet.test({
-  name: "Ensure that we can defrost after 30 blocks",
+  name:  `Ensure that we can defrost after ${MIN_FREEZING_BLOCKS} blocks`,
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    const flipPowerSwitchBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'flip-power-switch', [], deployer.address),
-    ])
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
-    assertEquals(flipPowerSwitchBlock.receipts[0].result, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const mintBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+
+    const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
+  },
+});
+
+Clarinet.test({
+  name:  `Ensure that we can't defrost pops we don't own`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+  },
+});
+
+Clarinet.test({
+  name:  `Ensure that we can't defrost pops with unknown id`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+    defrostPopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID);
+  },
+});
+
+Clarinet.test({
+  name:  `Ensure that we can't defrost pops we don't own`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+  },
+});
+
+/*Clarinet.test({
+  name:  `Ensure that we can defrost after ${MIN_FREEZING_BLOCKS} blocks when ICE machine is empty`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+
+
+
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+     checkIceBalance(deployer.address, chain, `(ok u0)`);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+    //const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
+   
+  },
+});*/
+
+Clarinet.test({
+  name:  `Ensure that we can't resend a heat wave too early`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let attacker = accounts.get('wallet_1')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const calculBalance = (chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3;
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE - calculBalance}`);
+
+    const heatWaveBlock = chain.mineBlock([
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'heat-wave-at', [types.principal(deployer.address)], attacker.address),
     ]);
-    const freezeBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'freeze-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
+    assertEquals(heatWaveBlock.receipts[0].result, '(err u501)', 'Shouldnt be able to send a heat wave');
+  },
+});
+
+
+Clarinet.test({
+  name:  `Ensure that we can send a heat wave after ${MELT_TIME} block`,
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let attacker = accounts.get('wallet_1')!;
+
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const calculBalance = Math.round((chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3);
+    const calculMachineBalance = INITIAL_ICE - calculBalance;
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${calculMachineBalance}`);
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MELT_TIME);
+
+
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(ok true)') 
+
+    // we try to resend, should be too hot
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(err u502)') 
+
+    // we check balances
+    const calculNewBalance = Math.round(calculBalance - ((calculBalance * (MELT_RATE+REWARD_RATE))/100));
+    checkIceBalance(deployer.address, chain, `(ok u${calculNewBalance})`);
+
+    let calculAttackerBalance = Math.round((calculBalance * REWARD_RATE)/100);
+    const attackerBalance = checkIceBalance(attacker.address, chain, `(ok u${calculAttackerBalance})`);
+
+    checkIceBalanceMachine(deployer.address, chain, `u${Math.round(calculMachineBalance + (calculBalance * MELT_RATE)/100)}`);
+
+    // we transfer
+    const tranferBlock = chain.mineBlock([
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
-
-    let frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
-    assertEquals(frozenBalance.result, 'u3');
-
-    assertEquals(freezeBlock.receipts[0].result, '(ok true)');
+    assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
 
-    chain.mineEmptyBlock(31);
+  
+    calculAttackerBalance = calculAttackerBalance + (calculNewBalance-4);
+    checkIceBalance(attacker.address, chain, `(ok u${calculAttackerBalance})`);
 
-    const defrostBlockSuccess = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MELT_TIME);
 
-    frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    // We try to resend heat wave with low balance
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(err u503)') 
 
-    assertEquals(defrostBlockSuccess.receipts[0].result, '(ok true)');
-    assertEquals(frozenBalance.result, 'u0');
   },
 });
 
 
 
 Clarinet.test({
-  name: "Ensure that we can mint",
+  name:  `Ensure that we can't send a heat wave after ${MELT_TIME} block if the wallet has been active`,
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
-    // Mine a block with one transaction.
+    let attacker = accounts.get('wallet_1')!;
 
-    const flipPowerSwitchBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'flip-power-switch', [], deployer.address),
-    ])
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
-    assertEquals(flipPowerSwitchBlock.receipts[0].result, '(ok true)');
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const mintBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
-      Tx.contractCall('test-pops-v2', 'mint', [], deployer.address),
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
+
+
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+
+
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    const calculBalance = Math.round((chain.blockHeight - freezeBlock.height) * ICE_PER_POP_PER_BLOCK * 3);
+    const calculMachineBalance = INITIAL_ICE - calculBalance;
+    checkIceBalance(deployer.address, chain, `(ok u${calculBalance})`);
+    checkIceBalanceMachine(deployer.address, chain, `u${calculMachineBalance}`);
+
+    // We mine empty blocks 
+    chain.mineEmptyBlock(MELT_TIME+10);
+
+    // we transfer 1 $ICE
+    const tranferBlock = chain.mineBlock([
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
     ]);
-
-    const freezeBlock = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'freeze-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
-
-    assertEquals(freezeBlock.receipts[0].result, '(ok true)');
-
-    // TOO EARLY
-    const defrostBlockFail = chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
-
-    assertEquals(defrostBlockFail.receipts[0].result, '(err u501)');
-
-    chain.mineEmptyBlock(31);
-
-    // OK
-    const defrostBlockSuccess= chain.mineBlock([
-      Tx.contractCall('test-pops-ice-machine-v2', 'defrost-many', [types.list([types.uint(10000), types.uint(1), types.uint(9999)])], deployer.address),
-    ]);
-    
-    
+    assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
 
-    let frozenBalance = chain.callReadOnlyFn('test-frozen-pops-v2', 'get-balance', [types.principal(deployer.address)], deployer.address);
+    sendHeatwaveAndTest(attacker.address, deployer.address, chain, '(err u501)')
 
   },
 });

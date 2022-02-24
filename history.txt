@@ -1,0 +1,84 @@
+#V2
+(contract-call? .test-pops-v2 mint)\n(contract-call? .test-pops-v2 mint)\n(contract-call? .test-pops-v2 mint)
+(contract-call? .test-pops-v3 mint)
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+(contract-call? .test-pops-ice-machine-v3 flip-power-switch)
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))
+::get_assets_maps 
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+:advance_chain_tip 1999
+::advance_chain_tip 1999
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+::advance_chain_tip 1
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+::get_assets_maps 
+::set_tx_sender STFCVYY1RJDNJHST7RRTPACYHVJQDJ7R1DWTQHQA
+(contract-call? 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE.test-pops-ice-v3 heat-wave-at 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE)\n
+::advance_chain_tip 48000
+(contract-call? 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE.test-pops-ice-v3 heat-wave-at 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE)\n
+::advance_chain_tip 1
+(contract-call? 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE.test-pops-ice-v3 heat-wave-at 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE)\n
+::get_assets_maps 
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n
+(contract-call? .test-pops-ice-machine-v3 flip-power-switch)
+::advance_chain_tip 1999
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))
+::advance_chain_tip 1999
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+::advance_chain_tip 1
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+::get_assets_maps \n
+(contract-call? 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE.test-pops-ice-v3 heat-wave-at 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE)\n
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+exit
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+(contract-call? .test-pops-ice-machine-v3 flip-power-switch)\n
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
+::advance_chain_tip 1999\n
+::advance_chain_tip 1999
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::advance_chain_tip 1
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+(contract-call? .test-pops-ice-machine-v3 flip-power-switch)
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::advance_chain_tip 2000\n
+::advance_chain_tip 2000
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::advance_chain_tip 2000\n
+::advance_chain_tip 2000
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
+::set_tx_sender ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE.test-pops-ice-machine-v3
+::set_tx_sender .test-pops-ice-machine-v3
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+(contract-call? .test-pops-ice-machine-v3 flip-power-switch)\n
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::advance_chain_tip 2000
+::get_assets_maps 
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::get_assets_maps 
+(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)\n(contract-call? .test-pops-v3 mint)
+\n(contract-call? .test-pops-ice-machine-v3 flip-power-switch)
+(contract-call? .test-pops-ice-machine-v3 freeze-many (list u1 u10000 u9999))\n
+::advance_chain_tip 2000
+::get_assets_maps \n
+(contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
+::get_assets_maps \n
+(contract-call? .frozen-stacks-pops-v8 get-contract-uri)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri 1)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u1)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u5)
+exit
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u5)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u10)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u1)
+::help
+::list_functions

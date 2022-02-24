@@ -2,18 +2,27 @@
 name = "machine"
 requirements = []
 
-[contracts.test-frozen-pops-v2]
-path = "contracts/test-frozen-pops-v2.clar"
+[contracts.frozen-stacks-pops-v1]
+path = "contracts/frozen-stacks-pops-v1.clar"
 depends_on = []
 
-[contracts.test-pops-v2]
-path = "contracts/test-pops-v2.clar"
+[contracts.stacks-pops-v1]
+path = "contracts/stacks-pops-v1.clar"
 depends_on = []
 
-[contracts.test-pops-ice-v2]
-path = "contracts/test-pops-ice-v2.clar"
+[contracts.stacks-pops-ice-v1]
+path = "contracts/stacks-pops-ice-v1.clar"
 depends_on = []
 
-[contracts.test-pops-ice-machine-v2]
-path = "contracts/test-pops-ice-machine-v2.clar"
-depends_on = ["test-pops-v2", "test-pops-ice-v2"]
+[contracts.stacks-pops-ice-machine-v1]
+path = "contracts/stacks-pops-ice-machine-v1.clar"
+depends_on = ["stacks-pops-v1", "stacks-pops-ice-v1"]
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = true
+trusted_caller = true
+callee_filter = true

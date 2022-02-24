@@ -1,27 +1,20 @@
-(define-non-fungible-token FrozenPop uint)
+(define-non-fungible-token frozen-stacks-pops uint)
 
 ;; Storage
 (define-map token-count principal uint)
-(define-map market uint {price: uint, commission: principal})
 
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
-(define-constant ERR-SOLD-OUT (err u300))
-(define-constant ERR-WRONG-COMMISSION (err u301))
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-METADATA-FROZEN (err u505))
 (define-constant ERR-MINT-ALREADY-SET (err u506))
-(define-constant ERR-LISTING (err u507))
-(define-constant ERR-NOT-FOUND u401)
-(define-constant FROZEN-POP-LIMIT u888)
-
 
 ;; Define Variables
 (define-data-var last-id uint u0)
 (define-data-var mintpass-sale-active bool false)
 (define-data-var metadata-frozen bool false)
-(define-data-var base-uri (string-ascii 80) "ipfs://Q.. /{id}.json")
-(define-constant contract-uri "ipfs://")
+(define-data-var base-uri (string-ascii 256) "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-{id}.json")
+(define-constant contract-uri "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops.json")
 (define-map mint-address bool principal)
 
 ;; Token count for account
@@ -35,8 +28,8 @@
 
 ;; SIP009: Get the owner of the specified token ID
 (define-read-only (get-owner (id uint))
-  ;; Make sure to replace FrozenPop
-  (ok (nft-get-owner? FrozenPop id)))
+  ;; Make sure to replace frozen-stacks-pops
+  (ok (nft-get-owner? frozen-stacks-pops id)))
 
 ;; SIP009: Get the last token ID
 (define-read-only (get-last-token-id)
@@ -52,17 +45,31 @@
 ;; Mint new NFT
 ;; can only be called from the Mint
 (define-public (mint (new-owner principal) (id uint))
-(begin
-  (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-  (nft-mint? FrozenPop id new-owner)))
+  (let 
+    ((owner-balance (get-balance new-owner)))
+    (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
+    (try! (nft-mint? frozen-stacks-pops id new-owner))
+    (map-set token-count
+      new-owner
+      (+ owner-balance u1))
+    (ok true)
+  )
+)
 
 (define-public (burn (id uint) (owner principal))
-  (begin
+  (let 
+    ((owner-balance (get-balance owner)))
     (asserts! (called-from-mint) ERR-NOT-AUTHORIZED)
-    (nft-burn? FrozenPop id owner)))
+    (try! (nft-burn? frozen-stacks-pops id owner))
+    (map-set token-count
+      owner
+      (- owner-balance u1))
+    (ok true)
+  )
+)
 
 ;; Set base uri
-(define-public (set-base-uri (new-base-uri (string-ascii 80)))
+(define-public (set-base-uri (new-base-uri (string-ascii 256)))
   (begin
     (asserts! (is-eq contract-caller CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
     (asserts! (not (var-get metadata-frozen)) ERR-METADATA-FROZEN)

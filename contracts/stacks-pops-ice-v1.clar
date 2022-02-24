@@ -6,14 +6,20 @@
 (define-constant ACTIONS-AT-DEPLOY {freeze: block-height, melt: block-height})
 
 ;; 5% of ice can melt within a year if not used
-(define-constant MELT-TIME u30)
+(define-constant MELT-TIME u48000)
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
+(define-constant MIN-BALANCE u1618)
 
 ;; get the token balance of owner
 (define-read-only (get-balance (owner principal))
   (begin
     (ok (ft-get-balance ice owner))))
+
+;; get the token balance of the caller
+(define-read-only (get-caller-balance)
+  (begin
+    (ok (ft-get-balance ice tx-sender))))
 
 ;; returns the total number of tokens
 (define-read-only (get-total-supply)
@@ -46,7 +52,7 @@
     (ok true)))
 
 (define-public (get-token-uri)
-  (ok (some u"ipfs://Qm")))
+  (ok (some u"https://stackspops.club/ice/ice.json")))
 
 ;;
 ;; melt functions
@@ -63,7 +69,7 @@
     )
     (asserts! (> block-height (+ (get freeze user-actions) MELT-TIME)) ERR-TOO-COLD)
     (asserts! (> block-height (+ (get melt user-actions) MELT-TIME)) ERR-TOO-HOT)
-    (asserts! (or (is-eq melt-amount u0) (is-eq reward-amount u0)) (ok true))
+    (asserts! (>= user-balance MIN-BALANCE) ERR-TOO-LOW)
     (map-set last-actions user (merge user-actions {melt: block-height}))
     (try! (ft-transfer? ice  melt-amount user (var-get ice-machine)))
     (try! (ft-transfer? ice  reward-amount user tx-sender))
