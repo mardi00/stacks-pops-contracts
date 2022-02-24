@@ -2,3 +2,5 @@ settings/
 .DS_Store
 metadata/frozen-stacks-pops-metadata/*
 metadata/stacks-pops-metadata/*
+.vscode
+history.txt
