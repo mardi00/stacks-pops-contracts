@@ -2,6 +2,8 @@
 (define-fungible-token ice TOTAL-SUPPLY)
 
 (define-data-var ice-machine principal tx-sender)
+(define-data-var initiated bool false)
+
 (define-map last-actions principal {freeze: uint, melt: uint})
 (define-constant ACTIONS-AT-DEPLOY {freeze: block-height, melt: block-height})
 
@@ -10,6 +12,8 @@
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
 (define-constant MIN-BALANCE u1618)
+
+
 
 ;; get the token balance of owner
 (define-read-only (get-balance (owner principal))
@@ -80,9 +84,12 @@
 
 (define-public (set-ice-machine (machine principal))
   (begin
+    (asserts! (is-eq (var-get initiated) false) ERR-MACHINE-ALREADY-SET)
     (var-set ice-machine machine)
+    (var-set initiated true)
     (ft-mint? ice TOTAL-SUPPLY machine)))
 
 (define-constant ERR-TOO-COLD (err u501))
 (define-constant ERR-TOO-HOT (err u502))
 (define-constant ERR-TOO-LOW (err u503))
+(define-constant ERR-MACHINE-ALREADY-SET (err u504))

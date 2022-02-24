@@ -18,8 +18,8 @@ depends_on = []
 path = "contracts/stacks-pops-ice-machine-v1.clar"
 depends_on = ["stacks-pops-v1", "stacks-pops-ice-v1"]
 
-[repl.analysis]
-passes = ["check_checker"]
+#[repl.analysis]
+#passes = ["check_checker"]
 
 [repl.analysis.check_checker]
 strict = false
