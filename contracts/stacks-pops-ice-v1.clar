@@ -53,7 +53,7 @@
     (ok true)))
 
 (define-public (get-token-uri)
-  (ok (some u"https://stackspops.club/ice/ice.json)))
+  (ok (some u"https://stackspops.club/ice/ice.json")))
 
 ;;
 ;; melt functions
