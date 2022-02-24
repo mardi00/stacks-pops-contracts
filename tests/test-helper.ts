@@ -10,9 +10,9 @@ export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${
 export const STACKS_POPS_ICE_CONTRACT_NAME = `stacks-pops-ice-${version}`;
 
 export const INITIAL_ICE = 1380000000;
-export const MIN_FREEZING_BLOCKS = 2; // 20000
-export const ICE_PER_POP_PER_BLOCK = 1000; // 1
-export const MELT_TIME = 2; // 48000
+export const MIN_FREEZING_BLOCKS = 1000; 
+export const ICE_PER_POP_PER_BLOCK = 1;
+export const MELT_TIME = 48000;
 export const MELT_RATE = 4;
 export const REWARD_RATE = 1;
 export const MIN_BALANCE = 1618;

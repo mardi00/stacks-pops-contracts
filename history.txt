@@ -72,3 +72,13 @@ exit
 ::get_assets_maps \n
 (contract-call? .test-pops-ice-machine-v3 defrost-many (list u1 u10000 u9999))\n
 ::get_assets_maps \n
+(contract-call? .frozen-stacks-pops-v8 get-contract-uri)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri 1)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u1)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u5)
+exit
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u5)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u10)
+(contract-call? .frozen-stacks-pops-v8 get-token-uri u1)
+::help
+::list_functions

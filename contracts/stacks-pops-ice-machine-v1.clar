@@ -5,12 +5,9 @@
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
 
-;; 2 weeks min
-;;(define-constant MIN-FREEZING-BLOCKS u2000)
-;;(define-constant ICE-PER-POP-PER-BLOCK u1)
-
-(define-constant MIN-FREEZING-BLOCKS u2)
-(define-constant ICE-PER-POP-PER-BLOCK u1000)
+;; Freeze 1 week min
+(define-constant MIN-FREEZING-BLOCKS u1000)
+(define-constant ICE-PER-POP-PER-BLOCK u1)
 
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))

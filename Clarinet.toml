@@ -17,3 +17,12 @@ depends_on = []
 [contracts.stacks-pops-ice-machine-v8]
 path = "contracts/stacks-pops-ice-machine-v1.clar"
 depends_on = ["stacks-pops-v8", "stacks-pops-ice-v8"]
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = true
+trusted_caller = true
+callee_filter = true
