@@ -3,16 +3,16 @@ import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 
-const version = 'v5';
+const version = 'v8';
 export const STACKS_POPS_CONTRACT_NAME = `stacks-pops-${version}`;
 export const FROZEN_STACKS_POPS_CONTRACT_NAME = `frozen-stacks-pops-${version}`;
 export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${version}`;
 export const STACKS_POPS_ICE_CONTRACT_NAME = `stacks-pops-ice-${version}`;
 
 export const INITIAL_ICE = 1380000000;
-export const MIN_FREEZING_BLOCKS = 2000;
-export const ICE_PER_POP_PER_BLOCK = 1;
-export const MELT_TIME = 48000;
+export const MIN_FREEZING_BLOCKS = 2; // 20000
+export const ICE_PER_POP_PER_BLOCK = 1000; // 1
+export const MELT_TIME = 2; // 48000
 export const MELT_RATE = 4;
 export const REWARD_RATE = 1;
 export const MIN_BALANCE = 1618;
@@ -30,11 +30,11 @@ export const mintPopsAndTest = (caller: string, chain: Chain) => {
   return mintBlock;
 };
 
-export const flipPowerSwitchAndTest = (caller: string, chain: Chain) => {
+export const flipPowerSwitchAndTest = (caller: string, chain: Chain, expected: string) => {
   const flipPowerSwitchBlock = chain.mineBlock([
     Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'flip-power-switch', [], caller),
   ])
-  assertEquals(flipPowerSwitchBlock.receipts[0].result, '(ok true)', 'Should be able to flip machine switch');
+  assertEquals(flipPowerSwitchBlock.receipts[0].result, expected, `Should be ${expected} got ${flipPowerSwitchBlock.receipts[0].result}`);
   return flipPowerSwitchBlock;
 };
 

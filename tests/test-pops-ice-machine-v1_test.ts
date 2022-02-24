@@ -49,7 +49,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -64,12 +64,22 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "Ensure that the machine can be switched on by owner only",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    let wallet1 = accounts.get('wallet_1')!;
+
+    flipPowerSwitchAndTest(wallet1.address, chain, '(err u401)');
+  },
+});
+
+Clarinet.test({
   name: "Ensure that we can't freeze pops we don't own",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
     let wallet1 = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -85,7 +95,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -102,7 +112,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -124,7 +134,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -156,7 +166,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let wallet1 = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -181,7 +191,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -207,7 +217,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let wallet1 = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -232,7 +242,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -270,7 +280,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let attacker = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -311,7 +321,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let attacker = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
@@ -385,7 +395,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     let attacker = accounts.get('wallet_1')!;
 
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 

@@ -91,7 +91,7 @@ Clarinet.test({
   name: "External can't burn pop",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
-    flipPowerSwitchAndTest(deployer.address, chain);
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
 

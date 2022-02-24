@@ -6,7 +6,8 @@
 (define-constant ACTIONS-AT-DEPLOY {freeze: block-height, melt: block-height})
 
 ;; 5% of ice can melt within a year if not used
-(define-constant MELT-TIME u48000)
+;;(define-constant MELT-TIME u48000)
+(define-constant MELT-TIME u2)
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
 (define-constant MIN-BALANCE u1618)
