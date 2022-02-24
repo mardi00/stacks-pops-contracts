@@ -86,3 +86,9 @@ export const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain
   ]);
   assertEquals(heatWaveBlock.receipts[0].result, expected, `Should ${expected} got ${heatWaveBlock.receipts[0].result}`);
 };
+
+export const checkFreezeBlockAndTest = (owner: string, chain: Chain, id: number, expected: string) => {
+  const freezeBlock = chain.callReadOnlyFn(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'get-freeze-block-height', [types.uint(id)], owner);
+  assertEquals(freezeBlock.result, expected,  `Should be ${expected} but got ${freezeBlock.result}`);
+  return freezeBlock;
+};
