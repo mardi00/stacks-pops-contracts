@@ -88,7 +88,7 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
     const uri = chain.callReadOnlyFn(FROZEN_STACKS_POPS_CONTRACT_NAME, 'get-token-uri', [types.uint(99)], deployer.address);
-    const expected = `(ok (some "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-99.json"))`;
+    const expected = `(ok (some "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-{id}.json"))`;
     assertEquals(uri.result, expected, `Should be ${expected} but got ${uri.result}`);
   },
 });
