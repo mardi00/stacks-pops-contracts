@@ -87,6 +87,10 @@
   (default-to u0
     (map-get? frozen-pops id)))
 
+;; Get machine state
+(define-read-only (get-machine-state)
+  (ok (var-get running)))
+
 ;; Get the machine ice balance
 (define-read-only (get-machine-ice-balance)
   (unwrap! (as-contract (contract-call? .stacks-pops-ice-v1 get-caller-balance)) u0))
