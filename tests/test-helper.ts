@@ -46,7 +46,6 @@ export const checkMachineStateAndTest = (owner: string, chain: Chain, expected: 
 };
 
 
-
 export const checkPopsBalanceByOwner = (owner: string, chain: Chain, expected: string) => {
   const balance = chain.callReadOnlyFn(STACKS_POPS_CONTRACT_NAME, 'get-pops-by-owner', [types.principal(owner)], owner);
   assertEquals(balance.result, expected, `Should have ${expected} but result is ${balance.result}`);

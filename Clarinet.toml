@@ -1,28 +1,18 @@
 [project]
 name = "machine"
-requirements = []
-
-[contracts.frozen-stacks-pops-v1]
-path = "contracts/frozen-stacks-pops-v1.clar"
-depends_on = []
-
-[contracts.stacks-pops-v1]
-path = "contracts/stacks-pops-v1.clar"
-depends_on = []
+telemetry = false
+requirements = [
+	{ contract_id = "SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops" },
+]
 
 [contracts.stacks-pops-ice-v1]
 path = "contracts/stacks-pops-ice-v1.clar"
 depends_on = []
 
+[contracts.frozen-stacks-pops-v1]
+path = "contracts/frozen-stacks-pops-v1.clar"
+depends_on = []
+
 [contracts.stacks-pops-ice-machine-v1]
 path = "contracts/stacks-pops-ice-machine-v1.clar"
-depends_on = ["stacks-pops-v1", "stacks-pops-ice-v1"]
-
-#[repl.analysis]
-#passes = ["check_checker"]
-
-[repl.analysis.check_checker]
-strict = false
-trusted_sender = true
-trusted_caller = true
-callee_filter = true
+depends_on = ["stacks-pops-ice-v1"]
