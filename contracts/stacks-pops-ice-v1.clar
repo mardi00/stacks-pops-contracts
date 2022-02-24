@@ -51,7 +51,7 @@
     (print memo)
     (ok true)))
 
-(define-public (get-token-uri)
+(define-read-only (get-token-uri)
   (ok (some u"https://stackspops.club/ice/ice.json")))
 
 ;;
