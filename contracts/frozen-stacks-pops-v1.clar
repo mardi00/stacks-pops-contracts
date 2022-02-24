@@ -11,7 +11,6 @@
 
 ;; Define Variables
 (define-data-var last-id uint u0)
-(define-data-var mintpass-sale-active bool false)
 (define-data-var metadata-frozen bool false)
 (define-data-var base-uri (string-ascii 256) "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-{id}.json")
 (define-constant contract-uri "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops.json")
