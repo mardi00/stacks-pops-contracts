@@ -74,28 +74,22 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name: "Ensure that we can get-token-uri",
+  name: "Ensure that we can get-contract-uri",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-      let deployer = accounts.get('deployer')!;
-
-    const block = chain.mineBlock([
-      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'get-token-uri', [types.uint(99)], deployer.address),
-    ]);
-    const expected = `(ok (some "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-{id}.json"))`;
-    assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
+    let deployer = accounts.get('deployer')!;
+    const uri = chain.callReadOnlyFn(FROZEN_STACKS_POPS_CONTRACT_NAME, 'get-contract-uri', [], deployer.address);
+    const expected = `(ok "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops.json")`;
+    assertEquals(uri.result, expected, `Should be ${expected} but got ${uri.result}`);
   },
 });
 
 Clarinet.test({
-  name: "Ensure that we can get-ccontract-uri",
+  name: "Ensure that we can get-token-uri for u99",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-      let deployer = accounts.get('deployer')!;
-
-    const block = chain.mineBlock([
-      Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'get-contract-uri', [], deployer.address),
-    ]);
-    const expected = `(ok "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops.json")`;
-    assertEquals(block.receipts[0].result, expected, `Should be ${expected} but got ${block.receipts[0].result}`);
+    let deployer = accounts.get('deployer')!;
+    const uri = chain.callReadOnlyFn(FROZEN_STACKS_POPS_CONTRACT_NAME, 'get-token-uri', [types.uint(99)], deployer.address);
+    const expected = `(ok (some "ipfs://QmayHCoY25enr4XmBQxyVFKSU9tkRPy64JywNDDaK9c8MT/frozen-stacks-pops-99.json"))`;
+    assertEquals(uri.result, expected, `Should be ${expected} but got ${uri.result}`);
   },
 });
 
