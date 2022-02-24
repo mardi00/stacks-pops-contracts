@@ -84,13 +84,12 @@
 
 ;; Get pop freeze height
 (define-read-only (get-freeze-block-height (id uint))
-  (unwrap! (map-get? frozen-pops id) u0)
-)
+  (default-to u0
+    (map-get? frozen-pops id)))
 
 ;; Get the machine ice balance
 (define-read-only (get-machine-ice-balance)
-  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v1 get-caller-balance)) u0)
-)
+  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v1 get-caller-balance)) u0))
 
 
 ;; set mint address for frozen-pops
