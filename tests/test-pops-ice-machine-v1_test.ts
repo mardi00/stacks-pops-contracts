@@ -5,9 +5,11 @@ import {
   mintPopsAndTest,
   checkIceBalanceMachine,
   checkFrozenBalanceByOwner,
+  checkFreezeBlockAndTest,
   checkPopsBalanceByOwner,
   freezePopsAndTest,
   flipPowerSwitchAndTest,
+  checkMachineStateAndTest,
   defrostPopsAndTest,
   checkIceBalance,
   sendHeatwaveAndTest,
@@ -38,6 +40,7 @@ Clarinet.test({
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
     freezePopsAndTest(deployer.address, chain, '(err u500)', STACKSPOPS);
+    checkFreezeBlockAndTest(deployer.address, chain, 1, `u0`)
 
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
@@ -48,7 +51,6 @@ Clarinet.test({
   name: "Ensure that the machine can be switched on and we can freeze pops",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let deployer = accounts.get('deployer')!;
-
     flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
@@ -60,6 +62,19 @@ Clarinet.test({
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+  },
+});
+
+
+Clarinet.test({
+  name: "Ensure that the machine can be switched on and off",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    checkMachineStateAndTest(deployer.address, chain, '(ok false)');
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    checkMachineStateAndTest(deployer.address, chain, '(ok true)');
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok false)');
+    checkMachineStateAndTest(deployer.address, chain, '(ok false)');
   },
 });
 

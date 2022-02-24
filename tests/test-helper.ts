@@ -39,6 +39,14 @@ export const flipPowerSwitchAndTest = (caller: string, chain: Chain, expected: s
 };
 
 
+export const checkMachineStateAndTest = (owner: string, chain: Chain, expected: string) => {
+  const state = chain.callReadOnlyFn(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'get-machine-state', [], owner);
+  assertEquals(state.result, expected, `Should have ${expected} but result is ${state.result}`);
+  return state;
+};
+
+
+
 export const checkPopsBalanceByOwner = (owner: string, chain: Chain, expected: string) => {
   const balance = chain.callReadOnlyFn(STACKS_POPS_CONTRACT_NAME, 'get-pops-by-owner', [types.principal(owner)], owner);
   assertEquals(balance.result, expected, `Should have ${expected} but result is ${balance.result}`);
