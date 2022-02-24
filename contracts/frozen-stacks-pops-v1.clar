@@ -69,7 +69,7 @@
 )
 
 ;; Set base uri
-(define-public (set-base-uri (new-base-uri (string-ascii 80)))
+(define-public (set-base-uri (new-base-uri (string-ascii 256)))
   (begin
     (asserts! (is-eq contract-caller CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
     (asserts! (not (var-get metadata-frozen)) ERR-METADATA-FROZEN)
