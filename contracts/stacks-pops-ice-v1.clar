@@ -53,7 +53,7 @@
     (ok true)))
 
 (define-public (get-token-uri)
-  (ok (some u"ipfs://Qm")))
+  (ok (some u"https://stackspops.club/ice/ice.json)))
 
 ;;
 ;; melt functions
