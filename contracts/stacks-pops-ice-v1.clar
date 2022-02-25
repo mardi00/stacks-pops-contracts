@@ -60,7 +60,7 @@
 
 ;;
 ;; melt functions
-;;
+;; melt-amount and reward-amount can't be 0 because of MIN-BALANCE
 (define-read-only (get-last-actions (user principal))
   (default-to ACTIONS-AT-DEPLOY (map-get? last-actions user)))
 

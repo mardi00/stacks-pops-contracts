@@ -66,6 +66,25 @@ Clarinet.test({
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
   },
 });
+Clarinet.test({
+  name: "Ensure that the machine can be switched on and we can 't freeze twice the same pops",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+    flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
+    mintPopsAndTest(deployer.address, chain);
+    checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
+
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
+
+    checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
+    checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
+    freezePopsAndTest(deployer.address, chain, '(err u401)', STACKSPOPS);
+  },
+});
 
 
 Clarinet.test({
