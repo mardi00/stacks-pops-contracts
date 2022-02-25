@@ -60,7 +60,7 @@
     (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
     (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner))
       okValue (ok okValue)
-      ;; We ignore the error since we want the user to still be able to defrost if his pops if the machine doesn't have enough $ICE
+      ;; We ignore the error since we want the user to still be able to defrost if the machine doesn't have enough $ICE
       errValue (ok true) 
     )
   )
