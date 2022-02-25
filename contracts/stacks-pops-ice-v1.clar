@@ -84,7 +84,7 @@
 
 (define-public (set-ice-machine (machine principal))
   (begin
-    (asserts! (is-eq (var-get initiated) false) ERR-MACHINE-ALREADY-SET)
+    (asserts! (not (var-get initiated)) ERR-MACHINE-ALREADY-SET)
     (var-set ice-machine machine)
     (var-set initiated true)
     (ft-mint? ice TOTAL-SUPPLY machine)))

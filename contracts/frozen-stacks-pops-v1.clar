@@ -89,6 +89,5 @@
 ;; can only be called once
 (define-public (set-mint-address)
   (begin
-    (asserts! (is-none (map-get? mint-address true)) ERR-MINT-ALREADY-SET)
-    (map-insert mint-address true tx-sender)
+    (asserts! (map-insert mint-address true tx-sender) ERR-MINT-ALREADY-SET)
     (ok (print tx-sender))))
