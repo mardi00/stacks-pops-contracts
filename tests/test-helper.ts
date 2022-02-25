@@ -108,22 +108,28 @@ export const defrostPopsAndTest = (caller: string, chain: Chain, expected: strin
   return defrostBlock;
 };
 
-export const checkDefrostTokenEvents = (freezeBlock: any, caller: string) => {
+export const checkDefrostTokenEvents = (defrostBlock: any, caller: string) => {
   STACKSPOPS_INT.forEach((id) => {
-    freezeBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
+    defrostBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
      `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
       caller, 
       `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
       `stacks-pops`,
     );
-    freezeBlock.receipts[0].events.expectNonFungibleTokenBurnEvent(
+    defrostBlock.receipts[0].events.expectNonFungibleTokenBurnEvent(
       types.uint(id),
       caller, 
       `${CONTRACT_DEPLOYER}.${FROZEN_STACKS_POPS_CONTRACT_NAME}`,
       `frozen-stacks-pops`,
     );
   });
+  defrostBlock.receipts[0].events.expectFungibleTokenTransferEvent(
+    1001,
+    `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+    caller, 
+    `ice`,
+  );
 }
 
 export const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain, expected: string) => {
