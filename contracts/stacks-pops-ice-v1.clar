@@ -49,7 +49,7 @@
     (map-set last-actions recipient (merge (get-last-actions recipient) {freeze: block-height}))
     (ft-transfer? ice amount sender recipient)))
 
-(define-public (transfer-memo (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+(define-public (transfer-memo (amount uint) (sender principal) (recipient principal) (memo (buff 34)))
   (begin
     (try! (transfer amount sender recipient))
     (print memo)
