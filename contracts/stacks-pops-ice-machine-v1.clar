@@ -21,11 +21,11 @@
 
 ;; Freeze a Pop
 (define-private (freeze (id uint))
-  (let ((owner (unwrap! (unwrap! (contract-call? .stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+  (let ((owner (unwrap! (unwrap! (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
-    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
+    (try! (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops transfer id tx-sender (as-contract tx-sender)))
     (contract-call? .frozen-stacks-pops-v1 mint tx-sender id)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
@@ -56,7 +56,7 @@
     (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
     (map-delete frozen-pops id)
     (try! (contract-call? .frozen-stacks-pops-v1 burn id tx-sender))
-    (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
+    (try! (as-contract (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops transfer id tx-sender owner)))
     (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner (some 0x646566726f737420726577617264)))
       okValue (ok okValue)
       ;; We ignore the error since we want the user to still be able to defrost if the machine doesn't have enough $ICE

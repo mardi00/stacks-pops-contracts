@@ -1,5 +1,5 @@
 ;; Implement the `ft-trait` trait defined in the `ft-trait` contract
-(impl-trait .ft-trait.sip-010-trait)
+(impl-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
 
 (define-constant TOTAL-SUPPLY u1380000000)
 (define-fungible-token ice TOTAL-SUPPLY)
