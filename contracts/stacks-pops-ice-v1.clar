@@ -51,7 +51,9 @@
     (asserts! (is-eq tx-sender sender) (err u4))
     (map-set last-actions sender (merge (get-last-actions sender) {freeze: block-height}))
     (map-set last-actions recipient (merge (get-last-actions recipient) {freeze: block-height}))
-    (ft-transfer? ice amount sender recipient)))
+    (try! (ft-transfer? ice amount sender recipient))
+    (print memo)
+    (ok true)))
 
 (define-public (set-token-uri (value (string-utf8 256)))
   (if (is-eq tx-sender contract-creator) 
@@ -69,7 +71,9 @@
 ;; melt tokens
 (define-private (melt-ice (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
-    (ft-transfer? ice amount sender recipient)))
+    (try! (ft-transfer? ice amount sender recipient))
+    (print memo)
+    (ok true)))
     
 (define-public (heat-wave-at (user principal))
   (let (
