@@ -2,6 +2,10 @@
 name = "machine"
 requirements = []
 
+[contracts.ft-trait]
+path = "contracts/ft-trait.clar"
+depends_on = []
+
 [contracts.frozen-stacks-pops-v1]
 path = "contracts/frozen-stacks-pops-v1.clar"
 depends_on = []
@@ -12,7 +16,7 @@ depends_on = []
 
 [contracts.stacks-pops-ice-v1]
 path = "contracts/stacks-pops-ice-v1.clar"
-depends_on = []
+depends_on = ["ft-trait"]
 
 [contracts.stacks-pops-ice-machine-v1]
 path = "contracts/stacks-pops-ice-machine-v1.clar"
