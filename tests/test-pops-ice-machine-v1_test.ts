@@ -1,5 +1,5 @@
 
-import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land/x/clarinet@v0.13.0/index.ts';
+import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land/x/clarinet@v0.27.0/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import {
   mintPopsAndTest,
@@ -25,7 +25,8 @@ import {
   STACKS_POPS_CONTRACT_NAME,
   FROZEN_STACKS_POPS_CONTRACT_NAME,
   STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
-  STACKS_POPS_ICE_CONTRACT_NAME
+  STACKS_POPS_ICE_CONTRACT_NAME,
+  STACKSPOPS_INT
 } from './test-helper.ts';
 
 Clarinet.test({
@@ -59,6 +60,7 @@ Clarinet.test({
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
     freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
