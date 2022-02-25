@@ -60,7 +60,6 @@
 
 ;;
 ;; melt functions
-;; melt-amount and reward-amount can't be 0 because of MIN-BALANCE
 (define-read-only (get-last-actions (user principal))
   (default-to ACTIONS-AT-DEPLOY (map-get? last-actions user)))
 
@@ -68,6 +67,7 @@
   (let (
       (user-actions (get-last-actions user))
       (user-balance (ft-get-balance ice user))
+      ;; melt-amount and reward-amount can't be 0 because of MIN-BALANCE
       (melt-amount (/ (* user-balance  MELT-RATE) u100))
       (reward-amount (/ (* user-balance REWARD-RATE) u100))
     )
