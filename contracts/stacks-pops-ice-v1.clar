@@ -1,24 +1,28 @@
+;; Implement the `ft-trait` trait defined in the `ft-trait` contract
+(impl-trait .ft-trait.sip-010-trait)
+
 (define-constant TOTAL-SUPPLY u1380000000)
 (define-fungible-token ice TOTAL-SUPPLY)
 
+(define-constant contract-creator tx-sender)
+
 (define-data-var ice-machine principal tx-sender)
 (define-data-var initiated bool false)
+(define-data-var token-uri (optional (string-utf8 256)) none)
 
 (define-map last-actions principal {freeze: uint, melt: uint})
 (define-constant ACTIONS-AT-DEPLOY {freeze: block-height, melt: block-height})
 
 ;; 5% of ice can melt within a year if not used
+(define-constant ERR-UNAUTHORIZED u1)
 (define-constant MELT-TIME u48000)
 (define-constant MELT-RATE u4)
 (define-constant REWARD-RATE u1)
 (define-constant MIN-BALANCE u1618)
 
-
-
 ;; get the token balance of owner
-(define-read-only (get-balance (owner principal))
-  (begin
-    (ok (ft-get-balance ice owner))))
+(define-read-only (get-balance (user principal))
+  (ok (ft-get-balance ice user)))
 
 ;; get the token balance of the caller
 (define-read-only (get-caller-balance)
@@ -31,7 +35,7 @@
 
 ;; returns the token name
 (define-read-only (get-name)
-  (ok "Ice token"))
+  (ok "Ice Token"))
 
 ;; the symbol or "ticker" for this token
 (define-read-only (get-symbol)
@@ -41,28 +45,36 @@
 (define-read-only (get-decimals)
   (ok u0))
 
-;; Transfers tokens to a recipient
-(define-public (transfer (amount uint) (sender principal) (recipient principal))
+;; transfers tokens to a recipient
+(define-public (transfer (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
   (begin
     (asserts! (is-eq tx-sender sender) (err u4))
     (map-set last-actions sender (merge (get-last-actions sender) {freeze: block-height}))
     (map-set last-actions recipient (merge (get-last-actions recipient) {freeze: block-height}))
-    (ft-transfer? ice amount sender recipient)))
-
-(define-public (transfer-memo (amount uint) (sender principal) (recipient principal) (memo (buff 34)))
-  (begin
-    (try! (transfer amount sender recipient))
+    (try! (ft-transfer? ice amount sender recipient))
     (print memo)
     (ok true)))
 
+(define-public (set-token-uri (value (string-utf8 256)))
+  (if (is-eq tx-sender contract-creator) 
+    (ok (var-set token-uri (some value))) 
+    (err ERR-UNAUTHORIZED)))
+
 (define-read-only (get-token-uri)
-  (ok (some u"https://stackspops.club/ice/ice.json")))
+  (ok (var-get token-uri)))
 
 ;;
 ;; melt functions
 (define-read-only (get-last-actions (user principal))
   (default-to ACTIONS-AT-DEPLOY (map-get? last-actions user)))
 
+;; melt tokens
+(define-private (melt-ice (amount uint) (sender principal) (recipient principal) (memo (optional (buff 34))))
+  (begin
+    (try! (ft-transfer? ice amount sender recipient))
+    (print memo)
+    (ok true)))
+    
 (define-public (heat-wave-at (user principal))
   (let (
       (user-actions (get-last-actions user))
@@ -75,12 +87,11 @@
     (asserts! (> block-height (+ (get melt user-actions) MELT-TIME)) ERR-TOO-HOT)
     (asserts! (>= user-balance MIN-BALANCE) ERR-TOO-LOW)
     (map-set last-actions user (merge user-actions {melt: block-height}))
-    (try! (ft-transfer? ice  melt-amount user (var-get ice-machine)))
-    (try! (ft-transfer? ice  reward-amount user tx-sender))
+    (try! (melt-ice melt-amount user (var-get ice-machine) (some 0x686561742077617665206d656c74)))
+    (try! (melt-ice reward-amount user tx-sender (some 0x68656174207761766520726577617264)))
     (ok true)
   )
 )
-
 
 (define-public (set-ice-machine (machine principal))
   (begin
