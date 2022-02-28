@@ -19,7 +19,6 @@
 ;; Define Variables
 (define-data-var running bool false)
 
-
 ;; Freeze a Pop
 (define-private (freeze (id uint))
   (let ((owner (unwrap! (unwrap! (contract-call? .stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
@@ -74,9 +73,7 @@
     (map-delete frozen-pops id)
     (try! (contract-call? .frozen-stacks-pops-v1 burn id tx-sender))
     (try! (get-from-vault id owner))
-    ;;(try! (as-contract (contract-call? .stacks-pops-vault-1-v1 unlock-pop id owner)))
-    ;;(try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
-    (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner))
+    (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner (some 0x646566726f737420726577617264)))
       okValue (ok okValue)
       ;; We ignore the error since we want the user to still be able to defrost if the machine doesn't have enough $ICE
       errValue (ok true) 

@@ -405,7 +405,7 @@ Clarinet.test({
 
     // we transfer
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(calculNewBalance-4), types.principal(deployer.address), types.principal(attacker.address), types.none()], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
@@ -464,7 +464,7 @@ Clarinet.test({
 
     // we transfer 1 $ICE
     const tranferBlock = chain.mineBlock([
-      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address)], deployer.address),
+      Tx.contractCall(STACKS_POPS_ICE_CONTRACT_NAME, 'transfer', [types.uint(1), types.principal(deployer.address), types.principal(attacker.address), types.none()], deployer.address),
     ]);
     assertEquals(tranferBlock.receipts[0].result, `(ok true)`,  `Transfert should be succesful`);
 
