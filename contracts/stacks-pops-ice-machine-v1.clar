@@ -30,10 +30,10 @@
 
 (define-private (send-to-vault (id uint))
   (let ((slot (mod id u4)))
-    (and (is-eq slot u0) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-0-v1)))) 
-    (and (is-eq slot u1) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-1-v1)))) 
-    (and (is-eq slot u2) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-2-v1)))) 
-    (and (is-eq slot u3) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-3-v1)))) 
+    (and (is-eq slot u0)  (try! (contract-call? .stacks-pops-vault-0-v1 lock-pop id)))
+    (and (is-eq slot u1)  (try! (contract-call? .stacks-pops-vault-1-v1 lock-pop id)))
+    (and (is-eq slot u2)  (try! (contract-call? .stacks-pops-vault-2-v1 lock-pop id)))
+    (and (is-eq slot u3)  (try! (contract-call? .stacks-pops-vault-3-v1 lock-pop id)))
     (ok true)))
 
 (define-private (get-from-vault (id uint) (owner principal))

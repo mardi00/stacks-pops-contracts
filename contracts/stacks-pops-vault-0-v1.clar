@@ -7,6 +7,12 @@
     (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
     (ok true)))
 
+(define-public (lock-pop (id uint))
+  (begin
+    (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
+    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
+    (ok true)))
+
     
 ;; Manage the unlock
 (define-private (called-from-ice-machine)
