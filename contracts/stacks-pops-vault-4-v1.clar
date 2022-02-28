@@ -1,0 +1,22 @@
+(define-constant CONTRACT-OWNER tx-sender)
+(define-map ice-machine-address bool principal)
+
+(define-public (unlock-pop (id uint) (owner principal))
+  (begin
+    (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
+    (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
+    (ok true)))
+
+    
+;; Manage the Mint
+(define-private (called-from-ice-machine)
+  (is-eq contract-caller (unwrap! (map-get? ice-machine-address true) false)))
+
+;; can only be called once
+(define-public (set-ice-machine-address)
+  (begin
+    (asserts! (map-insert ice-machine-address true tx-sender) ERR-MACHINE-ALREADY-SET)
+    (ok (print tx-sender))))
+
+(define-constant ERR-MACHINE-ALREADY-SET (err u504))
+(define-constant ERR-NOT-AUTHORIZED (err u401))

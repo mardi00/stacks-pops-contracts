@@ -2,6 +2,23 @@
 name = "machine"
 requirements = []
 
+
+[contracts.stacks-pops-vault-1-v1]
+path = "contracts/stacks-pops-vault-1-v1.clar"
+depends_on = []
+
+[contracts.stacks-pops-vault-2-v1]
+path = "contracts/stacks-pops-vault-2-v1.clar"
+depends_on = []
+
+[contracts.stacks-pops-vault-3-v1]
+path = "contracts/stacks-pops-vault-3-v1.clar"
+depends_on = []
+
+[contracts.stacks-pops-vault-4-v1]
+path = "contracts/stacks-pops-vault-4-v1.clar"
+depends_on = []
+
 [contracts.frozen-stacks-pops-v1]
 path = "contracts/frozen-stacks-pops-v1.clar"
 depends_on = []
@@ -16,7 +33,7 @@ depends_on = []
 
 [contracts.stacks-pops-ice-machine-v1]
 path = "contracts/stacks-pops-ice-machine-v1.clar"
-depends_on = ["stacks-pops-v1", "stacks-pops-ice-v1"]
+depends_on = ["stacks-pops-v1", "stacks-pops-ice-v1", "stacks-pops-vault-1-v1", "stacks-pops-vault-2-v1", "stacks-pops-vault-3-v1", "stacks-pops-vault-4-v1"]
 
 #[repl.analysis]
 #passes = ["check_checker"]

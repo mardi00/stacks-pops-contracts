@@ -26,8 +26,20 @@
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
-    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
+    (try! (send-to-vault id))
     (contract-call? .frozen-stacks-pops-v1 mint tx-sender id)))
+
+(define-private (send-to-vault (id uint))
+  (let ((slot (mod id u4)))
+    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-1-v1)))
+    (ok true)
+  )
+)
+
+(define-private (get-from-vault (id uint) (owner principal))
+  (let ((slot (mod id u4)))
+    (try! (as-contract (contract-call? .stacks-pops-vault-1-v1 unlock-pop id owner)))
+    (ok true)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
   (begin
@@ -57,7 +69,9 @@
     (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
     (map-delete frozen-pops id)
     (try! (contract-call? .frozen-stacks-pops-v1 burn id tx-sender))
-    (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
+    (try! (get-from-vault id owner))
+    ;;(try! (as-contract (contract-call? .stacks-pops-vault-1-v1 unlock-pop id owner)))
+    ;;(try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
     (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner))
       okValue (ok okValue)
       ;; We ignore the error since we want the user to still be able to defrost if the machine doesn't have enough $ICE
@@ -100,3 +114,8 @@
 ;; set mint address for frozen-pops
 (as-contract (contract-call? .frozen-stacks-pops-v1 set-mint-address))
 (as-contract (contract-call? .stacks-pops-ice-v1 set-ice-machine tx-sender))
+
+(as-contract (contract-call? .stacks-pops-vault-1-v1 set-ice-machine-address))
+(as-contract (contract-call? .stacks-pops-vault-2-v1 set-ice-machine-address))
+(as-contract (contract-call? .stacks-pops-vault-3-v1 set-ice-machine-address))
+(as-contract (contract-call? .stacks-pops-vault-4-v1 set-ice-machine-address))
