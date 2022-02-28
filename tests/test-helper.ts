@@ -20,6 +20,8 @@ export const STACKSPOPS_INT = [10000, 1, 9999];
 export const STACKSPOPS_INVALID = types.list([types.uint(10000), types.uint(1), types.uint(722)]);
 const CONTRACT_DEPLOYER = "ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE";
 
+export const VAULT_CONTRACT_NAME = (popId: number) =>  `stacks-pops-vault-${popId%4}-${version}`;
+
 export const mintPopsAndTest = (caller: string, chain: Chain) => {
   const calls = [];
   for (let i = 0; i < 3; i++) {
@@ -77,7 +79,7 @@ export const freezePopsAndTest = (caller: string, chain: Chain, expected: string
     Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'freeze-many', [pops], caller),
   ]);
   assertEquals(freezeBlock.receipts[0].result, expected, `Should be ${expected} but got ${freezeBlock.receipts[0].result}`);
-  //if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller);
+  if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller);
   return freezeBlock;
 };
 
@@ -86,7 +88,7 @@ export const checkFreezeTokenEvents = (freezeBlock: any, caller: string) => {
     freezeBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
       caller, 
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+      `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
       `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
       `stacks-pops`,
     );
@@ -104,7 +106,7 @@ export const defrostPopsAndTest = (caller: string, chain: Chain, expected: strin
     Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'defrost-many', [pops], caller),
   ]);
   assertEquals(defrostBlock.receipts[0].result, expected,  `Should be ${expected} but got ${defrostBlock.receipts[0].result}`);
-  //if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller);
+  if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller);
   return defrostBlock;
 };
 
@@ -112,7 +114,7 @@ export const checkDefrostTokenEvents = (defrostBlock: any, caller: string) => {
   STACKSPOPS_INT.forEach((id) => {
     defrostBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
-     `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+     `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
       caller, 
       `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
       `stacks-pops`,
