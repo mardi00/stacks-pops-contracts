@@ -8,7 +8,7 @@
     (ok true)))
 
     
-;; Manage the Mint
+;; Manage the unlock
 (define-private (called-from-ice-machine)
   (is-eq contract-caller (unwrap! (map-get? ice-machine-address true) false)))
 
