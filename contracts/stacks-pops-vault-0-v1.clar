@@ -1,13 +1,13 @@
 (define-constant CONTRACT-OWNER tx-sender)
 (define-map ice-machine-address bool principal)
 
-(define-public (unlock-pop (id uint) (owner principal))
+(define-public (pull-pop (id uint) (owner principal))
   (begin
     (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
     (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
     (ok true)))
 
-(define-public (lock-pop (id uint))
+(define-public (push-pop (id uint))
   (begin
     (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
     (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
