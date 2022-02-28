@@ -31,14 +31,18 @@
 
 (define-private (send-to-vault (id uint))
   (let ((slot (mod id u4)))
-    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-1-v1)))
-    (ok true)
-  )
-)
+    (and (is-eq slot u0) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-0-v1)))) 
+    (and (is-eq slot u1) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-1-v1)))) 
+    (and (is-eq slot u2) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-2-v1)))) 
+    (and (is-eq slot u3) (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract .stacks-pops-vault-3-v1)))) 
+    (ok true)))
 
 (define-private (get-from-vault (id uint) (owner principal))
   (let ((slot (mod id u4)))
-    (try! (as-contract (contract-call? .stacks-pops-vault-1-v1 unlock-pop id owner)))
+    (and (is-eq slot u0)  (try! (as-contract (contract-call? .stacks-pops-vault-0-v1 unlock-pop id owner))))
+    (and (is-eq slot u1)  (try! (as-contract (contract-call? .stacks-pops-vault-1-v1 unlock-pop id owner))))
+    (and (is-eq slot u2)  (try! (as-contract (contract-call? .stacks-pops-vault-2-v1 unlock-pop id owner))))
+    (and (is-eq slot u3)  (try! (as-contract (contract-call? .stacks-pops-vault-3-v1 unlock-pop id owner))))
     (ok true)))
 
 (define-public (freeze-three (id1 uint) (id2 uint) (id3 uint))
@@ -115,7 +119,7 @@
 (as-contract (contract-call? .frozen-stacks-pops-v1 set-mint-address))
 (as-contract (contract-call? .stacks-pops-ice-v1 set-ice-machine tx-sender))
 
+(as-contract (contract-call? .stacks-pops-vault-0-v1 set-ice-machine-address))
 (as-contract (contract-call? .stacks-pops-vault-1-v1 set-ice-machine-address))
 (as-contract (contract-call? .stacks-pops-vault-2-v1 set-ice-machine-address))
 (as-contract (contract-call? .stacks-pops-vault-3-v1 set-ice-machine-address))
-(as-contract (contract-call? .stacks-pops-vault-4-v1 set-ice-machine-address))
