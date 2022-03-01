@@ -79,7 +79,7 @@ export const freezePopsAndTest = (caller: string, chain: Chain, expected: string
     Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'freeze-many', [pops], caller),
   ]);
   assertEquals(freezeBlock.receipts[0].result, expected, `Should be ${expected} but got ${freezeBlock.receipts[0].result}`);
-  if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller);
+  //if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller);
   return freezeBlock;
 };
 
