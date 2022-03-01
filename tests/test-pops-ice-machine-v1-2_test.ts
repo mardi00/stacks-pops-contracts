@@ -19,10 +19,10 @@ export const mintManyPopsAndTest = (caller: string, chain: Chain, number: number
       assertEquals(mintBlock.receipts[0].result, '(ok true)', 'Should be able to mint');
       const mod = i%2;
       if(mod === 0) {
-        STACKSPOPS_ALL.push(types.uint(bottom))
+        STACKSPOPS_ALL.push(bottom)
         bottom+=1;
       } else {
-        STACKSPOPS_ALL.push(types.uint(top))
+        STACKSPOPS_ALL.push(top)
         top-=1;
       }
     }
@@ -35,7 +35,7 @@ export const mintManyPopsAndTest = (caller: string, chain: Chain, number: number
     let i = 1;
     for(const chunk of chunks) {
       console.log(`Freeze chunck ${i} out of ${chunks.length}`);
-      freezePopsAndTest(caller, chain, '(ok true)', types.list(chunk))
+      freezePopsAndTest(caller, chain, '(ok true)', chunk)
       i += 1;
     }
   };
@@ -47,12 +47,13 @@ export const mintManyPopsAndTest = (caller: string, chain: Chain, number: number
     );
   }
   
-  export const defrostManyPopsByChunkAndTest = (caller: string, chain: Chain, pops: any) => {
+  export const defrostManyPopsByChunkAndTest = (caller: string, chain: Chain, pops: any, name: string) => {
+    console.log(`------- > Start defrost for ${name}`);
     const chunks = chunkArray(pops, 10);
     let i = 1;
     for(const chunk of chunks) {
-      console.log(`Freeze chunck ${i} out of ${chunks.length}`);
-      defrostPopsAndTest(caller, chain, '(ok true)', types.list(chunk));
+      console.log(`Defrost chunck ${i} out of ${chunks.length}`);
+      defrostPopsAndTest(caller, chain, '(ok true)', chunk);
       i += 1;
     }
   };
@@ -72,22 +73,27 @@ Clarinet.test({
       flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
 
 
-      const mint_wallet = (wallet: any, bottom: number = 1, top: number = 10000) =>{
+      const mint_wallet = (wallet: any, bottom: number = 1, top: number = 10000, name: string) =>{
         const { STACKSPOPS_ALL } = mintManyPopsAndTest(wallet.address, chain, 500, bottom, top);
-        freezeManyPopsByChunkAndTest(wallet.address, chain, STACKSPOPS_ALL, wallet.address.toString());
+        freezeManyPopsByChunkAndTest(wallet.address, chain, STACKSPOPS_ALL, name);
         return STACKSPOPS_ALL;
       }
 
-      const STACKSPOPS_WALL1 = mint_wallet(wallet_1);
-      const STACKSPOPS_WALL2 = mint_wallet(wallet_2, 251, 9750);
-      const STACKSPOPS_WALL3 = mint_wallet(wallet_3, 501, 9500);
-      const STACKSPOPS_WALL4 = mint_wallet(wallet_4, 751, 9250);
-      const STACKSPOPS_WALL5 = mint_wallet(wallet_5, 1001, 9000);
-      const STACKSPOPS_WALL6 = mint_wallet(wallet_6, 1251, 8750);
+      const STACKSPOPS_WALL1 = mint_wallet(wallet_1, 1, 10000, 'wallet1');
+      const STACKSPOPS_WALL2 = mint_wallet(wallet_2, 251, 9750, 'wallet2');
+      const STACKSPOPS_WALL3 = mint_wallet(wallet_3, 501, 9500, 'wallet3');
+      const STACKSPOPS_WALL4 = mint_wallet(wallet_4, 751, 9250, 'wallet4');
+      const STACKSPOPS_WALL5 = mint_wallet(wallet_5, 1001, 9000, 'wallet5');
+      const STACKSPOPS_WALL6 = mint_wallet(wallet_6, 1251, 8750, 'wallet6');
       // We mine empty blocks 
       chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
   
-     //defrostManyPopsByChunkAndTest(deployer.address, chain, STACKSPOPS_ALL_W1);
+     defrostManyPopsByChunkAndTest(wallet_1.address, chain, STACKSPOPS_WALL1, 'wallet1');
+     defrostManyPopsByChunkAndTest(wallet_2.address, chain, STACKSPOPS_WALL2, 'wallet2');
+     defrostManyPopsByChunkAndTest(wallet_3.address, chain, STACKSPOPS_WALL3, 'wallet3');
+     defrostManyPopsByChunkAndTest(wallet_4.address, chain, STACKSPOPS_WALL4, 'wallet4');
+     defrostManyPopsByChunkAndTest(wallet_5.address, chain, STACKSPOPS_WALL5, 'wallet5');
+     defrostManyPopsByChunkAndTest(wallet_6.address, chain, STACKSPOPS_WALL6, 'wallet6');
     },
   });
   

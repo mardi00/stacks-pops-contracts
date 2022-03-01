@@ -19,11 +19,11 @@ import {
   REWARD_RATE,
   MIN_BALANCE,
   STACKSPOPS,
-  STACKSPOPS_INVALID,
   STACKS_POPS_CONTRACT_NAME,
   FROZEN_STACKS_POPS_CONTRACT_NAME,
   STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
-  STACKS_POPS_ICE_CONTRACT_NAME
+  STACKS_POPS_ICE_CONTRACT_NAME,
+  STACKSPOPS_INT
 } from './test-helper.ts';
 
 
@@ -113,7 +113,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
     flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
     mintPopsAndTest(deployer.address, chain);
-    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
     const burnAddressBlock = chain.mineBlock([
       Tx.contractCall(FROZEN_STACKS_POPS_CONTRACT_NAME, 'burn', [types.uint(1), types.principal(deployer.address)], deployer.address),
