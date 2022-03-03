@@ -106,7 +106,7 @@ export const checkFreezeTokenEvents = (freezeBlock: any, caller: string, pops: a
   });
 }
 
-export const defrostPopsAndTest = (caller: string, chain: Chain, expected: string, pops: any) => {
+export const defrostPopsAndTest = (caller: string, chain: Chain, expected: string, pops: any, expected_reward: number) => {
   let pops_cv:any = [];
   pops.forEach((id: any)=> {
     pops_cv.push(types.uint(id))
@@ -116,11 +116,11 @@ export const defrostPopsAndTest = (caller: string, chain: Chain, expected: strin
     Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'defrost-many', [pop_cv_list], caller),
   ]);
   assertEquals(defrostBlock.receipts[0].result, expected,  `Should be ${expected} but got ${defrostBlock.receipts[0].result}`);
-  if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller, pops);
+  if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller, pops, expected_reward);
   return defrostBlock;
 };
 
-export const checkDefrostTokenEvents = (defrostBlock: any, caller: string, pops: any) => {
+export const checkDefrostTokenEvents = (defrostBlock: any, caller: string, pops: any, expected_reward: number) => {
   pops.forEach((id:any) => {
     defrostBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
@@ -135,13 +135,13 @@ export const checkDefrostTokenEvents = (defrostBlock: any, caller: string, pops:
       `${CONTRACT_DEPLOYER}.${FROZEN_STACKS_POPS_CONTRACT_NAME}`,
       `frozen-stacks-pops`,
     );
+    defrostBlock.receipts[0].events.expectFungibleTokenTransferEvent(
+       expected_reward,
+      `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+      caller, 
+      `ice`,
+    );
   });
-  defrostBlock.receipts[0].events.expectFungibleTokenTransferEvent(
-    1001,
-    `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
-    caller, 
-    `ice`,
-  );
 }
 
 export const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain, expected: string) => {

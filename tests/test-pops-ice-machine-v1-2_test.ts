@@ -31,7 +31,7 @@ export const mintManyPopsAndTest = (caller: string, chain: Chain, number: number
   
   export const freezeManyPopsByChunkAndTest = (caller: string, chain: Chain, pops: any, name: string) => {
     console.log(`------- > Start freeze for ${name}`);
-    const chunks = chunkArray(pops, 10);
+    const chunks = chunkArray(pops, 5);
     let i = 1;
     for(const chunk of chunks) {
       console.log(`Freeze chunck ${i} out of ${chunks.length}`);
@@ -47,17 +47,17 @@ export const mintManyPopsAndTest = (caller: string, chain: Chain, number: number
     );
   }
   
-  export const defrostManyPopsByChunkAndTest = (caller: string, chain: Chain, pops: any, name: string) => {
+  export const defrostManyPopsByChunkAndTest = (caller: string, chain: Chain, pops: any, name: string, expected_reward: number) => {
     console.log(`------- > Start defrost for ${name}`);
-    const chunks = chunkArray(pops, 10);
+    const chunks = chunkArray(pops, 5);
     let i = 1;
     for(const chunk of chunks) {
-      console.log(`Defrost chunck ${i} out of ${chunks.length}`);
-      defrostPopsAndTest(caller, chain, '(ok true)', chunk);
-      i += 1;
+      console.log(`Defrost chunck ${i} out of ${chunks.length}`)
+      defrostPopsAndTest(caller, chain, '(ok true)', chunk, expected_reward);
+      i+= 1;
     }
   };
-  
+  // 0 1 2 3 4 5
 
   
 Clarinet.test({
@@ -74,26 +74,35 @@ Clarinet.test({
 
 
       const mint_wallet = (wallet: any, bottom: number = 1, top: number = 10000, name: string) =>{
-        const { STACKSPOPS_ALL } = mintManyPopsAndTest(wallet.address, chain, 500, bottom, top);
-        freezeManyPopsByChunkAndTest(wallet.address, chain, STACKSPOPS_ALL, name);
+        const { STACKSPOPS_ALL } = mintManyPopsAndTest(wallet.address, chain, 500, bottom, top); // 500 tx
         return STACKSPOPS_ALL;
       }
 
+      // we mine all the 3000 pops
       const STACKSPOPS_WALL1 = mint_wallet(wallet_1, 1, 10000, 'wallet1');
       const STACKSPOPS_WALL2 = mint_wallet(wallet_2, 251, 9750, 'wallet2');
       const STACKSPOPS_WALL3 = mint_wallet(wallet_3, 501, 9500, 'wallet3');
       const STACKSPOPS_WALL4 = mint_wallet(wallet_4, 751, 9250, 'wallet4');
       const STACKSPOPS_WALL5 = mint_wallet(wallet_5, 1001, 9000, 'wallet5');
       const STACKSPOPS_WALL6 = mint_wallet(wallet_6, 1251, 8750, 'wallet6');
+
+
+      freezeManyPopsByChunkAndTest(wallet_1.address, chain, STACKSPOPS_WALL1, 'wallet1'); // 50 block
+      freezeManyPopsByChunkAndTest(wallet_2.address, chain, STACKSPOPS_WALL2, 'wallet2'); // 50 block
+      freezeManyPopsByChunkAndTest(wallet_3.address, chain, STACKSPOPS_WALL3, 'wallet3'); // 50 block
+      freezeManyPopsByChunkAndTest(wallet_4.address, chain, STACKSPOPS_WALL4, 'wallet4'); // 50 block
+      freezeManyPopsByChunkAndTest(wallet_5.address, chain, STACKSPOPS_WALL5, 'wallet5'); // 50 block
+      freezeManyPopsByChunkAndTest(wallet_6.address, chain, STACKSPOPS_WALL6, 'wallet6'); // 50 block
+
       // We mine empty blocks 
       chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
   
-     defrostManyPopsByChunkAndTest(wallet_1.address, chain, STACKSPOPS_WALL1, 'wallet1');
-     defrostManyPopsByChunkAndTest(wallet_2.address, chain, STACKSPOPS_WALL2, 'wallet2');
-     defrostManyPopsByChunkAndTest(wallet_3.address, chain, STACKSPOPS_WALL3, 'wallet3');
-     defrostManyPopsByChunkAndTest(wallet_4.address, chain, STACKSPOPS_WALL4, 'wallet4');
-     defrostManyPopsByChunkAndTest(wallet_5.address, chain, STACKSPOPS_WALL5, 'wallet5');
-     defrostManyPopsByChunkAndTest(wallet_6.address, chain, STACKSPOPS_WALL6, 'wallet6');
+     defrostManyPopsByChunkAndTest(wallet_1.address, chain, STACKSPOPS_WALL1, 'wallet1', 1600);
+     defrostManyPopsByChunkAndTest(wallet_2.address, chain, STACKSPOPS_WALL2, 'wallet2', 1600);
+     defrostManyPopsByChunkAndTest(wallet_3.address, chain, STACKSPOPS_WALL3, 'wallet3', 1600);
+     defrostManyPopsByChunkAndTest(wallet_4.address, chain, STACKSPOPS_WALL4, 'wallet4', 1600);
+     defrostManyPopsByChunkAndTest(wallet_5.address, chain, STACKSPOPS_WALL5, 'wallet5', 1600);
+     defrostManyPopsByChunkAndTest(wallet_6.address, chain, STACKSPOPS_WALL6, 'wallet6', 1600);
     },
   });
   
