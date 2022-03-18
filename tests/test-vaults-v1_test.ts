@@ -42,3 +42,19 @@ Clarinet.test({
     assertEquals(pushAddressBlock.receipts[0].result, expected, `Should be ${expected} but got ${pushAddressBlock.receipts[0].result}`);
   },
 });
+
+
+Clarinet.test({
+  name: "Can't set ice machine address ",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let deployer = accounts.get('deployer')!;
+
+    const setBlock = chain.mineBlock([
+      Tx.contractCall(VAULT_CONTRACT_NAME(1), 'set-ice-machine-address', [], deployer.address),
+    ]);
+    const expected = `(err u504)`;
+    assertEquals(setBlock.receipts[0].result, expected, `Should be ${expected} but got ${setBlock.receipts[0].result}`);
+  },
+});
+
+
