@@ -4,13 +4,13 @@
 (define-public (pull-pop (id uint) (owner principal))
   (begin
     (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
-    (try! (as-contract (contract-call? .stacks-pops-v1 transfer id tx-sender owner)))
+    (try! (as-contract (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops transfer id tx-sender owner)))
     (ok true)))
 
 (define-public (push-pop (id uint))
   (begin
     (asserts! (called-from-ice-machine) ERR-NOT-AUTHORIZED)
-    (try! (contract-call? .stacks-pops-v1 transfer id tx-sender (as-contract tx-sender)))
+    (try! (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops transfer id tx-sender (as-contract tx-sender)))
     (ok true)))
 
     

@@ -3,8 +3,8 @@ import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 
-const version = 'v1';
-export const STACKS_POPS_CONTRACT_NAME = `stacks-pops-${version}`;
+const version = 'v2';
+export const STACKS_POPS_CONTRACT_NAME = `SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops`;
 export const FROZEN_STACKS_POPS_CONTRACT_NAME = `frozen-stacks-pops-${version}`;
 export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${version}`;
 export const STACKS_POPS_ICE_CONTRACT_NAME = `stacks-pops-ice-${version}`;
@@ -20,7 +20,7 @@ export const STACKSPOPS_INT = [10000, 1, 9999];
 export const STACKSPOPS_INVALID_INT =  [10000, 1, 9999, 722];
 const CONTRACT_DEPLOYER = "ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE";
 
-export const VAULT_CONTRACT_NAME = (popId: number) =>  `stacks-pops-vault-${popId%4}-${version}`;
+export const VAULT_CONTRACT_NAME = (popId: number) =>  `stacks-pops-vault-${popId%4}-v1`;
 
 export const mintPopsAndTest = (caller: string, chain: Chain) => {
   const calls = [];
@@ -94,7 +94,7 @@ export const checkFreezeTokenEvents = (freezeBlock: any, caller: string, pops: a
       types.uint(id),
       caller, 
       `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
+      STACKS_POPS_CONTRACT_NAME,
       `stacks-pops`,
     );
     freezeBlock.receipts[0].events.expectNonFungibleTokenMintEvent(
@@ -126,7 +126,7 @@ export const checkDefrostTokenEvents = (defrostBlock: any, caller: string, pops:
       types.uint(id),
      `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
       caller, 
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
+      STACKS_POPS_CONTRACT_NAME,
       `stacks-pops`,
     );
     defrostBlock.receipts[0].events.expectNonFungibleTokenBurnEvent(

@@ -21,12 +21,12 @@
 
 ;; Freeze a Pop
 (define-private (freeze (id uint))
-  (let ((owner (unwrap! (unwrap! (contract-call? .stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
+  (let ((owner (unwrap! (unwrap! (contract-call? 'SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops get-owner id) ERR-FATAL) ERR-NOT-FOUND)))
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (map-insert frozen-pops id block-height) ERR-FATAL)
     (try! (push-to-vault id))
-    (contract-call? .frozen-stacks-pops-v1 mint tx-sender id)))
+    (contract-call? .frozen-stacks-pops-v2 mint tx-sender id)))
 
 (define-private (push-to-vault (id uint))
   (let ((slot (mod id u4)))
@@ -66,14 +66,14 @@
     (
       (freeze-bh (unwrap! (map-get? frozen-pops id) ERR-NOT-FOUND))
       (ice-cubes (* ICE-PER-POP-PER-BLOCK (- block-height freeze-bh)))
-      (owner (unwrap! (unwrap! (contract-call? .frozen-stacks-pops-v1 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
+      (owner (unwrap! (unwrap! (contract-call? .frozen-stacks-pops-v2 get-owner id) ERR-FATAL) ERR-NOT-FOUND))
     )
     (asserts! (is-eq owner tx-sender) ERR-NOT-AUTHORIZED)
     (asserts! (>= block-height (+ freeze-bh MIN-FREEZING-BLOCKS)) ERR-TOO-EARLY)
     (map-delete frozen-pops id)
-    (try! (contract-call? .frozen-stacks-pops-v1 burn id tx-sender))
+    (try! (contract-call? .frozen-stacks-pops-v2 burn id tx-sender))
     (try! (pull-from-vault id owner))
-    (match (as-contract (contract-call? .stacks-pops-ice-v1 transfer ice-cubes tx-sender owner (some 0x646566726f737420726577617264)))
+    (match (as-contract (contract-call? .stacks-pops-ice-v2 transfer ice-cubes tx-sender owner (some 0x646566726f737420726577617264)))
       okValue (ok okValue)
       ;; We ignore the error since we want the user to still be able to defrost if the machine doesn't have enough $ICE
       errValue (ok true) 
@@ -109,12 +109,19 @@
 
 ;; Get the machine ice balance
 (define-read-only (get-machine-ice-balance)
-  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v1 get-caller-balance)) u0))
+  (unwrap! (as-contract (contract-call? .stacks-pops-ice-v2 get-caller-balance)) u0))
 
+;; Swap v1 tokens to v2 tokens 
+(define-public (swap)
+  (let ((owner tx-sender)
+    (ice-v1-balance (unwrap! (contract-call? 'SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-v1 get-caller-balance) ERR-FATAL)))
+    (try! (as-contract (contract-call? .stacks-pops-ice-v2 transfer ice-v1-balance tx-sender owner (some 0x746F6B656E2073776170))))
+    (try! (contract-call? 'SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-v1 transfer ice-v1-balance owner 'SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-machine-v1 (some 0x6275726E)))
+    (ok true)))
 
 ;; set mint address for frozen-pops
-(as-contract (contract-call? .frozen-stacks-pops-v1 set-mint-address))
-(as-contract (contract-call? .stacks-pops-ice-v1 set-ice-machine tx-sender))
+(as-contract (contract-call? .frozen-stacks-pops-v2 set-mint-address))
+(as-contract (contract-call? .stacks-pops-ice-v2 set-ice-machine tx-sender))
 
 (as-contract (contract-call? .stacks-pops-vault-0-v1 set-ice-machine-address))
 (as-contract (contract-call? .stacks-pops-vault-1-v1 set-ice-machine-address))
