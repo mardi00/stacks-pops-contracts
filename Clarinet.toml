@@ -1,10 +1,11 @@
 [project]
 name = "machine"
 requirements = [
+    { contract_id = "SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard" },
 	{ contract_id = "SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-v1" },
-    # { contract_id = "SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-machine-v1" },
     { contract_id = "SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.frozen-stacks-pops-v1" },
     { contract_id = "SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops" },
+    { contract_id = "SP277HZA8AGXV42MZKDW5B2NNN61RHQ42MTAHVNB1.stacks-pops-ice-machine-v1" },
 ]
 
 [contracts.stacks-pops-vault-0-v1]
@@ -23,17 +24,13 @@ depends_on = []
 path = "contracts/stacks-pops-vault-3-v1.clar"
 depends_on = []
 
-[contracts.ft-trait]
-path = "contracts/ft-trait.clar"
-depends_on = []
-
 [contracts.frozen-stacks-pops-v2]
 path = "contracts/frozen-stacks-pops-v2.clar"
 depends_on = []
 
 [contracts.stacks-pops-ice-v2]
 path = "contracts/stacks-pops-ice-v2.clar"
-depends_on = ["ft-trait"]
+depends_on = []
 
 [contracts.stacks-pops-ice-machine-v2]
 path = "contracts/stacks-pops-ice-machine-v2.clar"

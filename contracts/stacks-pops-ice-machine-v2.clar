@@ -56,7 +56,7 @@
     item
     result))
 
-(define-public (freeze-many (ids (list 100 uint)))
+(define-public (freeze-many (ids (list 25 uint)))
   (begin
     (asserts! (>= (len ids) u3) ERR-FATAL)
     (fold check-err (map freeze ids) (ok true))))
@@ -88,7 +88,7 @@
     (try! (defrost id3))
     (ok true)))
 
-(define-public (defrost-many (ids (list 100 uint)))
+(define-public (defrost-many (ids (list 25 uint)))
   (fold check-err (map defrost ids) (ok true)))
 
 ;; Switch power on or off
