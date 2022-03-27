@@ -21,30 +21,24 @@ import {
   REWARD_RATE,
   MIN_BALANCE,
   STACKSPOPS,
-  STACKSPOPS_INVALID,
   STACKS_POPS_CONTRACT_NAME,
   FROZEN_STACKS_POPS_CONTRACT_NAME,
   STACKS_POPS_ICE_MACHINE_CONTRACT_NAME,
   STACKS_POPS_ICE_CONTRACT_NAME,
-  STACKSPOPS_INT
+  STACKSPOPS_INT,
+  STACKSPOPS_INVALID_INT
 } from './test-helper.ts';
 
 Clarinet.test({
   name: "Ensure that pops can't be frozen if the machine is off",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let deployer = accounts.get('deployer')!;
+    const deployer = accounts.get('deployer')!;
 
     mintPopsAndTest(deployer.address, chain);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
+    checkFrozenBalanceByOwner(deployer.address, chain, `u0`);
 
-    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
-    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
-
-    freezePopsAndTest(deployer.address, chain, '(err u500)', STACKSPOPS);
-    checkFreezeBlockAndTest(deployer.address, chain, 1, `u0`)
-
-    checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
-    checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
+    freezePopsAndTest(deployer.address, chain, '(err u500)', STACKSPOPS_INT,);
   },
 });
 
@@ -59,7 +53,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -77,12 +71,12 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
-    freezePopsAndTest(deployer.address, chain, '(err u401)', STACKSPOPS);
+    freezePopsAndTest(deployer.address, chain, '(err u401)', STACKSPOPS_INT);
   },
 });
 
@@ -122,7 +116,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    freezePopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+    freezePopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS_INT);
   },
 });
 
@@ -138,7 +132,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    freezePopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID);
+    freezePopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID_INT);
   },
 });
 
@@ -155,13 +149,13 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u3');
 
-    defrostPopsAndTest(deployer.address, chain, '(err u501)', STACKSPOPS);
+    defrostPopsAndTest(deployer.address, chain, '(err u501)', STACKSPOPS_INT, 0);
   },
 });
 
@@ -177,7 +171,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -186,7 +180,7 @@ Clarinet.test({
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
-    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
@@ -209,7 +203,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -218,7 +212,7 @@ Clarinet.test({
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
-    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
   },
 });
 
@@ -234,7 +228,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -243,7 +237,7 @@ Clarinet.test({
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
-    defrostPopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID);
+    defrostPopsAndTest(deployer.address, chain, '(err u404)', STACKSPOPS_INVALID_INT, 0);
   },
 });
 
@@ -260,7 +254,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -269,7 +263,7 @@ Clarinet.test({
     // We mine empty blocks 
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
-    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS);
+    defrostPopsAndTest(wallet1.address, chain, '(err u401)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
   },
 });
 
@@ -279,7 +273,7 @@ Clarinet.test({
     let deployer = accounts.get('deployer')!;
 
     flipPowerSwitchAndTest(deployer.address, chain, '(ok true)');
-    mintPopsAndTest(deployer.address, chain);
+    mintPopsAndTest(deployer.address, chain, 3);
     checkIceBalanceMachine(deployer.address, chain, `u${INITIAL_ICE}`);
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
@@ -324,7 +318,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -335,7 +329,7 @@ Clarinet.test({
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
 
-    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
 
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
@@ -364,7 +358,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -374,7 +368,7 @@ Clarinet.test({
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
 
-    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
 
@@ -438,7 +432,7 @@ Clarinet.test({
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
     checkFrozenBalanceByOwner(deployer.address, chain, 'u0');
 
-    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    const freezeBlock = freezePopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT);
 
 
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [])');
@@ -448,7 +442,7 @@ Clarinet.test({
     chain.mineEmptyBlock(MIN_FREEZING_BLOCKS);
 
 
-    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS);
+    defrostPopsAndTest(deployer.address, chain, '(ok true)', STACKSPOPS_INT, MIN_FREEZING_BLOCKS+1);
     checkPopsBalanceByOwner(deployer.address, chain, '(ok [u10000, u1, u9999])');
 
 

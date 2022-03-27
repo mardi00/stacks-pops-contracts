@@ -3,8 +3,8 @@ import { Clarinet, Tx, Chain, Account, types, Contract } from 'https://deno.land
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 
-const version = 'v1';
-export const STACKS_POPS_CONTRACT_NAME = `stacks-pops-${version}`;
+const version = 'v2';
+export const STACKS_POPS_CONTRACT_NAME = `SPJW1XE278YMCEYMXB8ZFGJMH8ZVAAEDP2S2PJYG.stacks-pops`;
 export const FROZEN_STACKS_POPS_CONTRACT_NAME = `frozen-stacks-pops-${version}`;
 export const STACKS_POPS_ICE_MACHINE_CONTRACT_NAME = `stacks-pops-ice-machine-${version}`;
 export const STACKS_POPS_ICE_CONTRACT_NAME = `stacks-pops-ice-${version}`;
@@ -17,8 +17,10 @@ export const REWARD_RATE = 1;
 export const MIN_BALANCE = 1618;
 export const STACKSPOPS = types.list([types.uint(10000), types.uint(1), types.uint(9999)]);
 export const STACKSPOPS_INT = [10000, 1, 9999];
-export const STACKSPOPS_INVALID = types.list([types.uint(10000), types.uint(1), types.uint(722)]);
+export const STACKSPOPS_INVALID_INT =  [10000, 1, 9999, 722];
 const CONTRACT_DEPLOYER = "ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE";
+
+export const VAULT_CONTRACT_NAME = (popId: number) =>  `stacks-pops-vault-${popId%4}-v1`;
 
 export const mintPopsAndTest = (caller: string, chain: Chain) => {
   const calls = [];
@@ -73,21 +75,26 @@ export const checkIceBalanceMachine = (owner: string, chain: Chain, expected: st
 };
 
 export const freezePopsAndTest = (caller: string, chain: Chain, expected: string, pops: any) => {
+  let pops_cv:any = [];
+  pops.forEach((id: any)=> {
+    pops_cv.push(types.uint(id))
+  });
+  const pop_cv_list = types.list(pops_cv);
   const freezeBlock = chain.mineBlock([
-    Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'freeze-many', [pops], caller),
+    Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'freeze-many', [pop_cv_list], caller),
   ]);
   assertEquals(freezeBlock.receipts[0].result, expected, `Should be ${expected} but got ${freezeBlock.receipts[0].result}`);
-  if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller);
+  if(freezeBlock.receipts[0].result == '(ok true)') checkFreezeTokenEvents(freezeBlock, caller, pops);
   return freezeBlock;
 };
 
-export const checkFreezeTokenEvents = (freezeBlock: any, caller: string) => {
-  STACKSPOPS_INT.forEach((id) => {
+export const checkFreezeTokenEvents = (freezeBlock: any, caller: string, pops: any) => {
+  pops.forEach((id: any) => {
     freezeBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
       caller, 
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
+      `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
+      STACKS_POPS_CONTRACT_NAME,
       `stacks-pops`,
     );
     freezeBlock.receipts[0].events.expectNonFungibleTokenMintEvent(
@@ -99,22 +106,27 @@ export const checkFreezeTokenEvents = (freezeBlock: any, caller: string) => {
   });
 }
 
-export const defrostPopsAndTest = (caller: string, chain: Chain, expected: string, pops: any) => {
+export const defrostPopsAndTest = (caller: string, chain: Chain, expected: string, pops: any, expected_reward: number) => {
+  let pops_cv:any = [];
+  pops.forEach((id: any)=> {
+    pops_cv.push(types.uint(id))
+  });
+  const pop_cv_list = types.list(pops_cv);
   const defrostBlock = chain.mineBlock([
-    Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'defrost-many', [pops], caller),
+    Tx.contractCall(STACKS_POPS_ICE_MACHINE_CONTRACT_NAME, 'defrost-many', [pop_cv_list], caller),
   ]);
   assertEquals(defrostBlock.receipts[0].result, expected,  `Should be ${expected} but got ${defrostBlock.receipts[0].result}`);
-  if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller);
+  if(defrostBlock.receipts[0].result == '(ok true)') checkDefrostTokenEvents(defrostBlock, caller, pops, expected_reward);
   return defrostBlock;
 };
 
-export const checkDefrostTokenEvents = (defrostBlock: any, caller: string) => {
-  STACKSPOPS_INT.forEach((id) => {
+export const checkDefrostTokenEvents = (defrostBlock: any, caller: string, pops: any, expected_reward: number) => {
+  pops.forEach((id:any) => {
     defrostBlock.receipts[0].events.expectNonFungibleTokenTransferEvent(
       types.uint(id),
-     `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+     `${CONTRACT_DEPLOYER}.${VAULT_CONTRACT_NAME(id)}`,
       caller, 
-      `${CONTRACT_DEPLOYER}.${STACKS_POPS_CONTRACT_NAME}`,
+      STACKS_POPS_CONTRACT_NAME,
       `stacks-pops`,
     );
     defrostBlock.receipts[0].events.expectNonFungibleTokenBurnEvent(
@@ -123,13 +135,13 @@ export const checkDefrostTokenEvents = (defrostBlock: any, caller: string) => {
       `${CONTRACT_DEPLOYER}.${FROZEN_STACKS_POPS_CONTRACT_NAME}`,
       `frozen-stacks-pops`,
     );
+    defrostBlock.receipts[0].events.expectFungibleTokenTransferEvent(
+       expected_reward,
+      `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
+      caller, 
+      `ice`,
+    );
   });
-  defrostBlock.receipts[0].events.expectFungibleTokenTransferEvent(
-    1001,
-    `${CONTRACT_DEPLOYER}.${STACKS_POPS_ICE_MACHINE_CONTRACT_NAME}`,
-    caller, 
-    `ice`,
-  );
 }
 
 export const sendHeatwaveAndTest = (caller: string, target: string, chain: Chain, expected: string) => {
