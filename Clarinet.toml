@@ -36,6 +36,12 @@ depends_on = []
 path = "contracts/stacks-pops-ice-machine-v2.clar"
 depends_on = ["stacks-pops-ice-v2", "frozen-stacks-pops-v2", "stacks-pops-vault-0-v1", "stacks-pops-vault-1-v1", "stacks-pops-vault-2-v1", "stacks-pops-vault-3-v1"]
 
+
+[contracts.stacks-pops-roll-dice-v1]
+path = "contracts/stacks-pops-roll-dice-v1.clar"
+depends_on = ["stacks-pops-ice-v2"]
+
+
 #[repl.analysis]
 #passes = ["check_checker"]
 
