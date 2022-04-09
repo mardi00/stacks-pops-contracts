@@ -1,8 +1,8 @@
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MAX-PLAYERS-PER-BLOCK u50)
-(define-constant BET-VALUE u100)
-(define-constant WINNER-VALUE u300)
+(define-constant BET-COST u100)
+(define-constant WINNER-REWARD u300)
 
 ;; Define Variables
 (define-data-var running bool false)
@@ -17,12 +17,12 @@
 
 ;; checks property of last byte of given buffer
 ;; returns true if the last byte of the hash is even
-(define-private (execute-bet (random-value uint) (bet-value uint))
+(define-private (execute-bet (player principal) (random-value uint) (bet-value uint))
   (let ((draw-value (+ (mod random-value u6) u1)))
     (if
       (is-eq draw-value bet-value)
-      (as-contract (contract-call? .stacks-pops-ice-v2 transfer WINNER-VALUE tx-sender tx-sender (some 0x57494E)))
-      (contract-call? .stacks-pops-ice-v2 transfer BET-VALUE tx-sender .stacks-pops-ice-machine-v2 (some 0x4C4F4F5345))
+      (as-contract (contract-call? .stacks-pops-ice-v2 transfer WINNER-REWARD tx-sender player (some 0x57494E)))
+      (contract-call? .stacks-pops-ice-v2 transfer BET-COST tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
     )
     ;;(even last-value)
   )
@@ -33,13 +33,14 @@
   (let (
     (number-players-for-block (default-to u1 (map-get? number-players-per-block block-height)))
     (random-value (get-random-val-at number-players-for-block))
+    (player tx-sender)
   )
     ;; (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (<= number-players-for-block MAX-PLAYERS-PER-BLOCK) ERR-TOO-MANY-PLAYERS)
     (asserts! (<= bet-value u6) ERR-TOO-HIGH)
     (asserts! (>= bet-value u1) ERR-TOO-LOW)
     (map-set number-players-per-block block-height (+ number-players-for-block u1))
-    (execute-bet random-value bet-value)
+    (execute-bet player random-value bet-value)
   )
 )
 
