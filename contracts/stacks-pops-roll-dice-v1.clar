@@ -1,8 +1,8 @@
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MAX-PLAYERS-PER-BLOCK u50)
-(define-constant BET-VALUE u1000)
-(define-constant WINNER-VALUE u3000)
+(define-constant BET-VALUE u100)
+(define-constant WINNER-VALUE u300)
 
 ;; Define Variables
 (define-data-var running bool false)
@@ -17,7 +17,7 @@
 
 ;; checks property of last byte of given buffer
 ;; returns true if the last byte of the hash is even
-(define-private (is-winner (random-value uint) (bet-value uint))
+(define-private (execute-bet (random-value uint) (bet-value uint))
   (let ((draw-value (+ (mod random-value u6) u1)))
     (if
       (is-eq draw-value bet-value)
@@ -39,7 +39,7 @@
     (asserts! (<= bet-value u6) ERR-TOO-HIGH)
     (asserts! (>= bet-value u1) ERR-TOO-LOW)
     (map-set number-players-per-block block-height (+ number-players-for-block u1))
-    (is-winner random-value bet-value)
+    (execute-bet random-value bet-value)
   )
 )
 
