@@ -98,7 +98,9 @@
     (asserts! (not (var-get initiated)) ERR-MACHINE-ALREADY-SET)
     (var-set ice-machine machine)
     (var-set initiated true)
-    (ft-mint? ice TOTAL-SUPPLY machine)))
+    ;;(ft-mint? ice TOTAL-SUPPLY machine)
+      (ft-mint? ice u100000 'ST1HTBVD3JG9C05J7HBJTHGR0GGW7KXW28M5JS8QE)
+    ))
 
 (define-constant ERR-TOO-COLD (err u501))
 (define-constant ERR-TOO-HOT (err u502))

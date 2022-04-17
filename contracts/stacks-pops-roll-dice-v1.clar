@@ -15,8 +15,6 @@
     (var-set running (not (var-get running)))
     (ok (var-get running))))
 
-;; checks property of last byte of given buffer
-;; returns true if the last byte of the hash is even
 (define-private (execute-bet (player principal) (random-value uint) (bet-value uint))
   (let ((draw-value (+ (mod random-value u6) u1)))
     (if
@@ -35,7 +33,7 @@
     (random-value (get-random-val-at number-players-for-block))
     (player tx-sender)
   )
-    ;; (asserts! (var-get running) ERR-SWITCHED-OFF)
+    (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (<= number-players-for-block MAX-PLAYERS-PER-BLOCK) ERR-TOO-MANY-PLAYERS)
     (asserts! (<= bet-value u6) ERR-TOO-HIGH)
     (asserts! (>= bet-value u1) ERR-TOO-LOW)
