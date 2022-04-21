@@ -1,9 +1,10 @@
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MAX-PLAYERS-PER-BLOCK u50)
-(define-constant WINNER-REWARD-RATE u3)
 
 ;; Define Variables
+(define-data-var reward-rate uint u3)
+(define-data-var max-bet-ice-value uint u10000)
 (define-data-var running bool false)
 (define-map number-players-per-block uint uint)
 
@@ -14,19 +15,36 @@
     (var-set running (not (var-get running)))
     (ok (var-get running))))
 
-(define-private (execute-bet (player principal) (random-value uint) (bet-value uint) (bet-cost uint))
-  (let ((draw-value (+ (mod random-value u6) u1))
-  (prize-value (* bet-cost WINNER-REWARD-RATE)))
+;; Set the reward rate for a winner
+(define-public (set-game-params (new-reward-rate uint) (new-max-bet-ice-value uint))
+  (begin
+    (asserts! (is-eq contract-caller CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (var-set reward-rate new-reward-rate)
+    (var-set max-bet-ice-value new-max-bet-ice-value)
+    (ok true)))
+
+
+;; Send back collected $ICE from the contract to the machine
+(define-public (send-ice-to-machine (amount uint))
+  (begin
+    (asserts! (is-eq contract-caller CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (try! (as-contract (contract-call? .stacks-pops-ice-v2 transfer amount tx-sender .stacks-pops-ice-machine-v2 (some 0x4359434C45))))
+    (ok true)))
+
+
+(define-private (execute-bet (player principal) (random-value uint) (bet-dice-value uint) (bet-ice-value uint))
+  (let ((draw-dice-value (+ (mod random-value u6) u1))
+  (prize-value (* bet-ice-value (var-get reward-rate))))
     (if
-      (is-eq draw-value bet-value)
+      (is-eq draw-dice-value bet-dice-value)
       (as-contract (contract-call? .stacks-pops-ice-v2 transfer prize-value tx-sender player (some 0x57494E)))
-      (contract-call? .stacks-pops-ice-v2 transfer bet-cost tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
+      (contract-call? .stacks-pops-ice-v2 transfer bet-ice-value tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
     )
   )
 )
 
 ;; rool a dice using vrf on previous block
-(define-public (roll-dice (bet-value uint) (bet-cost uint))
+(define-public (roll-dice (bet-dice-value uint) (bet-ice-value uint))
   (let (
     (number-players-for-block (default-to u1 (map-get? number-players-per-block block-height)))
     (random-value (get-random-val-at number-players-for-block))
@@ -34,12 +52,14 @@
   )
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (<= number-players-for-block MAX-PLAYERS-PER-BLOCK) ERR-TOO-MANY-PLAYERS)
-    (asserts! (<= bet-value u6) ERR-TOO-HIGH)
-    (asserts! (>= bet-value u1) ERR-TOO-LOW)
+    (asserts! (<= bet-dice-value u6) ERR-DICE-VALUE-TOO-HIGH)
+    (asserts! (>= bet-dice-value u1) ERR-DICE-VALUE-TOO-LOW)
+    (asserts! (<= bet-ice-value  (var-get max-bet-ice-value)) ERR-ICE-VALUE-TOO-HIGH)
     (map-set number-players-per-block block-height (+ number-players-for-block u1))
-    (execute-bet player random-value bet-value bet-cost)
+    (execute-bet player random-value bet-dice-value bet-ice-value)
   )
 )
+
 
 ;; Get a random value at postion from vrf seed
 (define-read-only (get-random-val-at (pos uint))
@@ -70,8 +90,9 @@
 ;; Define Errors
 (define-constant ERR-NOT-AUTHORIZED (err u401))
 (define-constant ERR-SWITCHED-OFF (err u500))
-(define-constant ERR-TOO-LOW (err u501))
-(define-constant ERR-TOO-HIGH (err u502))
-(define-constant ERR-TOO-MANY-PLAYERS (err u503))
+(define-constant ERR-DICE-VALUE-TOO-LOW (err u501))
+(define-constant ERR-DICE-VALUE-TOO-HIGH (err u502))
+(define-constant ERR-ICE-VALUE-TOO-HIGH (err u503))
+(define-constant ERR-TOO-MANY-PLAYERS (err u504))
 
 
