@@ -1,7 +1,6 @@
 ;; Define Constants
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MAX-PLAYERS-PER-BLOCK u50)
-(define-constant BET-COST u100)
 (define-constant WINNER-REWARD-RATE u3)
 
 ;; Define Variables
@@ -15,19 +14,19 @@
     (var-set running (not (var-get running)))
     (ok (var-get running))))
 
-(define-private (execute-bet (player principal) (random-value uint) (bet-value uint))
+(define-private (execute-bet (player principal) (random-value uint) (bet-value uint) (bet-cost uint))
   (let ((draw-value (+ (mod random-value u6) u1))
-  (prize-value (* BET-COST WINNER-REWARD-RATE)))
+  (prize-value (* bet-cost WINNER-REWARD-RATE)))
     (if
       (is-eq draw-value bet-value)
       (as-contract (contract-call? .stacks-pops-ice-v2 transfer prize-value tx-sender player (some 0x57494E)))
-      (contract-call? .stacks-pops-ice-v2 transfer BET-COST tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
+      (contract-call? .stacks-pops-ice-v2 transfer bet-cost tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
     )
   )
 )
 
 ;; rool a dice using vrf on previous block
-(define-public (roll-dice (bet-value uint))
+(define-public (roll-dice (bet-value uint) (bet-cost uint))
   (let (
     (number-players-for-block (default-to u1 (map-get? number-players-per-block block-height)))
     (random-value (get-random-val-at number-players-for-block))
@@ -38,7 +37,7 @@
     (asserts! (<= bet-value u6) ERR-TOO-HIGH)
     (asserts! (>= bet-value u1) ERR-TOO-LOW)
     (map-set number-players-per-block block-height (+ number-players-for-block u1))
-    (execute-bet player random-value bet-value)
+    (execute-bet player random-value bet-value bet-cost)
   )
 )
 
