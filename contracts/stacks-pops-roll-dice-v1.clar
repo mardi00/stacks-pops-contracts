@@ -2,7 +2,7 @@
 (define-constant CONTRACT-OWNER tx-sender)
 (define-constant MAX-PLAYERS-PER-BLOCK u50)
 (define-constant BET-COST u100)
-(define-constant WINNER-REWARD u300)
+(define-constant WINNER-REWARD-RATE u3)
 
 ;; Define Variables
 (define-data-var running bool false)
@@ -16,13 +16,13 @@
     (ok (var-get running))))
 
 (define-private (execute-bet (player principal) (random-value uint) (bet-value uint))
-  (let ((draw-value (+ (mod random-value u6) u1)))
+  (let ((draw-value (+ (mod random-value u6) u1))
+  (prize-value (* BET-COST WINNER-REWARD-RATE)))
     (if
       (is-eq draw-value bet-value)
-      (as-contract (contract-call? .stacks-pops-ice-v2 transfer WINNER-REWARD tx-sender player (some 0x57494E)))
+      (as-contract (contract-call? .stacks-pops-ice-v2 transfer prize-value tx-sender player (some 0x57494E)))
       (contract-call? .stacks-pops-ice-v2 transfer BET-COST tx-sender .stacks-pops-roll-dice-v1 (some 0x4C4F4F5345))
     )
-    ;;(even last-value)
   )
 )
 
@@ -42,7 +42,7 @@
   )
 )
 
-;;
+;; Get a random value at postion from vrf seed
 (define-read-only (get-random-val-at (pos uint))
   (let ((seed (sha512 (unwrap-panic (get-block-info? vrf-seed (- block-height u1))))))
     (unwrap-panic (index-of BUFF_TO_BYTE (unwrap-panic (element-at seed pos))))
