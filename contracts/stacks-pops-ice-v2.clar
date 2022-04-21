@@ -106,3 +106,4 @@
 (define-constant ERR-TOO-HOT (err u502))
 (define-constant ERR-TOO-LOW (err u503))
 (define-constant ERR-MACHINE-ALREADY-SET (err u504))
+(define-constant ERR-FATAL (err u999))

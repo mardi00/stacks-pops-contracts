@@ -4,9 +4,19 @@
 
 ;; Define Variables
 (define-data-var reward-rate uint u3)
-(define-data-var max-bet-ice-value uint u10000)
+(define-data-var max-bet-ice-value uint u2000)
 (define-data-var running bool false)
 (define-map number-players-per-block uint uint)
+
+
+
+;; Deposit $ICE
+(define-public (deposit-ice)
+  (begin
+    (asserts! (is-eq contract-caller CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+    (var-set running (not (var-get running)))
+    (ok (var-get running))))
+
 
 ;; Switch power on or off
 (define-public (flip-power-switch)
@@ -32,9 +42,9 @@
     (ok true)))
 
 
-(define-private (execute-bet (player principal) (random-value uint) (bet-dice-value uint) (bet-ice-value uint))
+(define-private (execute-bet (player principal) (random-value uint) (bet-dice-value uint) (bet-ice-value uint) (prize-value uint))
   (let ((draw-dice-value (+ (mod random-value u6) u1))
-  (prize-value (* bet-ice-value (var-get reward-rate))))
+  )
     (if
       (is-eq draw-dice-value bet-dice-value)
       (as-contract (contract-call? .stacks-pops-ice-v2 transfer prize-value tx-sender player (some 0x57494E)))
@@ -49,14 +59,17 @@
     (number-players-for-block (default-to u1 (map-get? number-players-per-block block-height)))
     (random-value (get-random-val-at number-players-for-block))
     (player tx-sender)
+    (game-balance (unwrap! (as-contract (contract-call? .stacks-pops-ice-v2 get-caller-balance)) ERR-FATAL))
+    (prize-value (* bet-ice-value (var-get reward-rate)))
   )
     (asserts! (var-get running) ERR-SWITCHED-OFF)
     (asserts! (<= number-players-for-block MAX-PLAYERS-PER-BLOCK) ERR-TOO-MANY-PLAYERS)
     (asserts! (<= bet-dice-value u6) ERR-DICE-VALUE-TOO-HIGH)
     (asserts! (>= bet-dice-value u1) ERR-DICE-VALUE-TOO-LOW)
     (asserts! (<= bet-ice-value  (var-get max-bet-ice-value)) ERR-ICE-VALUE-TOO-HIGH)
+    (asserts! (>= game-balance prize-value) ERR-GAME-BALANCE-TOO-LOW)
     (map-set number-players-per-block block-height (+ number-players-for-block u1))
-    (execute-bet player random-value bet-dice-value bet-ice-value)
+    (execute-bet player random-value bet-dice-value bet-ice-value prize-value)
   )
 )
 
@@ -66,6 +79,10 @@
   (let ((seed (sha512 (unwrap-panic (get-block-info? vrf-seed (- block-height u1))))))
     (unwrap-panic (index-of BUFF_TO_BYTE (unwrap-panic (element-at seed pos))))
   )
+)
+;; Get game balance
+(define-read-only (get-game-balance)
+  (as-contract (contract-call? .stacks-pops-ice-v2 get-caller-balance))
 )
 
 (define-constant BUFF_TO_BYTE (list
@@ -93,6 +110,8 @@
 (define-constant ERR-DICE-VALUE-TOO-LOW (err u501))
 (define-constant ERR-DICE-VALUE-TOO-HIGH (err u502))
 (define-constant ERR-ICE-VALUE-TOO-HIGH (err u503))
-(define-constant ERR-TOO-MANY-PLAYERS (err u504))
+(define-constant ERR-GAME-BALANCE-TOO-LOW (err u504))
+(define-constant ERR-TOO-MANY-PLAYERS (err u505))
+(define-constant ERR-FATAL (err u999))
 
 
